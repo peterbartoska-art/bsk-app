@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bartoska Pro">
+<meta name="theme-color" content="#1e293b">
+<title>Bartoska Business Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --brand:#2563eb;--brand-d:#1d4ed8;--brand-l:#eff6ff;
+  --green:#16a34a;--green-l:#dcfce7;
+  --red:#dc2626;--red-l:#fee2e2;
+  --amber:#d97706;--amber-l:#fef3c7;
+  --bg:#f8fafc;--bg2:#ffffff;--bg3:#f1f5f9;
+  --sidebar:#1e293b;--sidebar2:#0f172a;
+  --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --rad:10px;--rads:6px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.08),0 2px 4px -1px rgba(0,0,0,0.04);
+  --sb:env(safe-area-inset-bottom,0px);
+  --st:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;background:var(--bg);}
+body{font-family:'DM Sans',sans-serif;color:var(--tx);font-size:14px;line-height:1.5;}
+
+/* ── LAYOUT ─────────────────────────── */
+.app{display:flex;height:100dvh;overflow:hidden;}
+
+/* ── SIDEBAR ─────────────────────────── */
+.sidebar{
+  width:220px;flex-shrink:0;background:var(--sidebar);
+  display:flex;flex-direction:column;
+  padding:0 0 calc(12px + var(--sb));
+  transition:transform .25s ease;
+  z-index:50;
+}
+.sidebar-logo{padding:calc(20px + var(--st)) 20px 16px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.sidebar-logo h1{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.sidebar-logo p{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.nav-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.3);padding:12px 12px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rads);cursor:pointer;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.9);}
+.nav-item.active{background:var(--brand);color:#fff;}
+.nav-item .ico{width:16px;height:16px;flex-shrink:0;opacity:0.8;}
+.nav-item.active .ico{opacity:1;}
+.sidebar-footer{padding:12px 8px 0;border-top:1px solid rgba(255,255,255,0.06);}
+.sync-status{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,0.4);}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#64748b;flex-shrink:0;}
+.sync-dot.ok{background:#22c55e;}
+.sync-dot.err{background:#ef4444;}
+.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ── MAIN ─────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:0 20px;height:56px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.topbar-title{font-size:16px;font-weight:600;color:var(--tx);flex:1;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--tx2);}
+.content{flex:1;overflow-y:auto;padding:20px;}
+
+/* ── MOBILE ─────────────────────────── */
+@media(max-width:768px){
+  .sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger{display:flex;}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40;display:none;}
+  .overlay.show{display:block;}
+  .content{padding:14px;}
+}
+
+/* ── BUTTONS ─────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--rads);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+.btn-primary:hover{background:var(--brand-d);}
+.btn-secondary{background:var(--bg2);color:var(--tx2);border-color:var(--border2);}
+.btn-secondary:hover{background:var(--bg3);}
+.btn-danger{background:var(--red-l);color:var(--red);border-color:#fca5a5;}
+.btn-danger:hover{background:#fecaca;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-icon{padding:7px;border-radius:var(--rads);}
+
+/* ── CARDS ─────────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad);box-shadow:var(--shadow);}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.card-title{font-size:14px;font-weight:600;color:var(--tx);}
+.card-body{padding:16px;}
+
+/* ── STATS GRID ─────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad);padding:16px;box-shadow:var(--shadow);}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--tx3);margin-bottom:6px;}
+.stat-value{font-size:22px;font-weight:700;color:var(--tx);font-family:'DM Mono',monospace;letter-spacing:-0.5px;}
+.stat-sub{font-size:12px;color:var(--tx3);margin-top:3px;}
+.stat-icon{float:right;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-top:-4px;}
+
+/* ── TABLE ─────────────────────────── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--tx3);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:11px 12px;font-size:13px;color:var(--tx2);border-bottom:1px solid var(--border);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--bg3);}
+tbody tr{cursor:pointer;}
+
+/* ── BADGES ─────────────────────────── */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-green{background:var(--green-l);color:var(--green);}
+.badge-red{background:var(--red-l);color:var(--red);}
+.badge-amber{background:var(--amber-l);color:var(--amber);}
+.badge-blue{background:var(--brand-l);color:var(--brand);}
+.badge-gray{background:var(--bg3);color:var(--tx3);}
+
+/* ── MODAL ─────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+@media(min-width:600px){.modal-overlay{align-items:center;}}
+.modal{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;max-width:600px;max-height:92dvh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+@media(min-width:600px){.modal{border-radius:var(--rad);}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;}
+.modal-title{font-size:15px;font-weight:600;}
+.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--tx3);padding:2px 6px;border-radius:4px;}
+.modal-close:hover{background:var(--bg3);}
+.modal-body{padding:18px;}
+.modal-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg2);position:sticky;bottom:0;}
+
+/* ── FORM ─────────────────────────── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid.cols-1{grid-template-columns:1fr;}
+.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-full{grid-column:1/-1;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:12px;font-weight:500;color:var(--tx2);}
+.field input,.field select,.field textarea{
+  font-size:13px;font-family:inherit;
+  padding:8px 10px;background:var(--bg);
+  border:1px solid var(--border2);border-radius:var(--rads);
+  color:var(--tx);outline:none;width:100%;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+.field textarea{resize:none;height:72px;line-height:1.5;}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr;}.form-grid.cols-3{grid-template-columns:1fr 1fr;}}
+
+/* ── SEARCH ─────────────────────────── */
+.search-bar{display:flex;gap:8px;margin-bottom:14px;}
+.search-input{flex:1;font-size:13px;font-family:inherit;padding:8px 10px 8px 32px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rads);color:var(--tx);outline:none;width:100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;}
+.search-input:focus{border-color:var(--brand);}
+
+/* ── INVOICE ITEMS ─────────────────────────── */
+.items-table{width:100%;border:1px solid var(--border);border-radius:var(--rads);overflow:hidden;margin-bottom:8px;}
+.items-table th{background:var(--bg3);padding:8px 10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--tx3);border-bottom:1px solid var(--border);}
+.items-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.items-table tr:last-child td{border-bottom:none;}
+.items-table input{border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--tx);width:100%;outline:none;padding:2px 4px;}
+.items-table input:focus{background:var(--brand-l);border-radius:3px;}
+.item-del{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:16px;padding:2px 6px;border-radius:3px;}
+.item-del:hover{color:var(--red);background:var(--red-l);}
+
+/* ── TOTALS ─────────────────────────── */
+.totals{background:var(--bg3);border-radius:var(--rads);padding:12px 14px;}
+.total-row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;color:var(--tx2);}
+.total-row.final{font-size:15px;font-weight:700;color:var(--tx);border-top:1px solid var(--border2);margin-top:6px;padding-top:8px;}
+
+/* ── PRINT ─────────────────────────── */
+.invoice-print{display:none;}
+@media print{
+  body *{visibility:hidden;}
+  .invoice-print,.invoice-print *{visibility:visible;}
+  .invoice-print{display:block!important;position:fixed;top:0;left:0;width:210mm;min-height:297mm;padding:15mm;background:#fff;z-index:9999;}
+  .no-print{display:none!important;}
+}
+
+/* ── SETUP SCREEN ─────────────────────────── */
+.setup{display:flex;align-items:center;justify-content:center;min-height:100dvh;background:var(--sidebar2);padding:20px;}
+.setup-card{background:var(--bg2);border-radius:16px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+.setup-logo{font-size:32px;margin-bottom:4px;}
+.setup-card h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+.setup-card p{font-size:14px;color:var(--tx2);margin-bottom:24px;line-height:1.6;}
+.setup-step{display:flex;gap:12px;margin-bottom:16px;padding:14px;background:var(--bg3);border-radius:var(--rads);}
+.setup-step-num{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.setup-step-text{font-size:13px;color:var(--tx2);line-height:1.5;}
+.setup-step-text strong{color:var(--tx);}
+
+/* ── DASHBOARD CHARTS ─────────────────────────── */
+.chart-bar{height:6px;background:var(--bg3);border-radius:3px;margin-top:6px;overflow:hidden;}
+.chart-fill{height:100%;border-radius:3px;background:var(--brand);transition:width .6s ease;}
+
+/* ── TOAST ─────────────────────────── */
+.toast{position:fixed;bottom:calc(20px + var(--sb));right:20px;background:#1e293b;color:#fff;padding:10px 16px;border-radius:var(--rads);font-size:13px;z-index:500;box-shadow:var(--shadow-md);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{background:#15803d;}
+.toast.err{background:#dc2626;}
+
+/* ── EMPTY STATE ─────────────────────────── */
+.empty{text-align:center;padding:48px 20px;color:var(--tx3);}
+.empty-ico{font-size:40px;margin-bottom:10px;}
+.empty p{font-size:14px;}
+
+/* ── FINANCE ─────────────────────────── */
+.fin-type-toggle{display:flex;gap:0;background:var(--bg3);border-radius:var(--rads);padding:2px;}
+.fin-type-btn{flex:1;padding:6px 12px;border:none;background:none;border-radius:calc(var(--rads) - 1px);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--tx2);transition:all .15s;}
+.fin-type-btn.active{background:var(--bg2);color:var(--tx);box-shadow:var(--shadow);}
+
+/* ── TABS ─────────────────────────── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tab-btn{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--tx3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+
+/* ── SETTINGS ─────────────────────────── */
+.settings-section{margin-bottom:24px;}
+.settings-section h3{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+/* ── GOOGLE CONNECT ─────────────────────────── */
+.google-btn{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;border:1px solid var(--border2);border-radius:var(--rads);cursor:pointer;font-size:14px;font-weight:500;font-family:inherit;color:var(--tx);box-shadow:var(--shadow);transition:all .15s;width:100%;}
+.google-btn:hover{box-shadow:var(--shadow-md);}
+.google-btn svg{flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="setup" style="display:none;">
+  <div class="setup-card">
+    <div class="setup-logo">🏢</div>
+    <h1>Bartoska Business Pro</h1>
+    <p>Verbinde dein Google Konto um die App zu nutzen. Deine Daten werden in deinem eigenen Google Sheet gespeichert.</p>
+    <div class="setup-step">
+      <div class="setup-step-num">1</div>
+      <div class="setup-step-text"><strong>Google Konto verbinden</strong> — Klicke auf den Button unten und melde dich mit deinem Google Konto an.</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-num">2</div>
+      <div class="setup-step-text"><strong>Google Sheet wird erstellt</strong> — Die App erstellt automatisch ein neues Sheet "Bartoska Business Pro" in deinem Google Drive.</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-num">3</div>
+      <div class="setup-step-text"><strong>Überall verfügbar</strong> — Alle Daten sind live synchronisiert auf Handy, Laptop und Tablet.</div>
+    </div>
+    <button class="google-btn" onclick="signInGoogle()" style="margin-top:8px;">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+      Mit Google anmelden
+    </button>
+    <p style="font-size:12px;color:var(--tx3);margin-top:16px;text-align:center;">Deine Daten verlassen nie deinen Google Account. Keine Werbung, kein fremder Server.</p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="appScreen" style="display:none;">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>Bartoska Pro</h1>
+      <p id="sidebarUser">Gebäudereinigung</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Übersicht</div>
+      <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-section">Verkauf</div>
+      <div class="nav-item" onclick="showPage('invoices')" data-page="invoices">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Rechnungen
+      </div>
+      <div class="nav-item" onclick="showPage('offers')" data-page="offers">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        Angebote
+      </div>
+      <div class="nav-item" onclick="showPage('customers')" data-page="customers">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Kunden
+      </div>
+      <div class="nav-section">Einkauf</div>
+      <div class="nav-item" onclick="showPage('suppliers')" data-page="suppliers">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Lieferanten
+      </div>
+      <div class="nav-item" onclick="showPage('products')" data-page="products">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Produkte
+      </div>
+      <div class="nav-section">Personal</div>
+      <div class="nav-item" onclick="showPage('employees')" data-page="employees">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mitarbeiter
+      </div>
+      <div class="nav-item" onclick="showPage('time')" data-page="time">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Zeiterfassung
+      </div>
+      <div class="nav-section">Finanzen</div>
+      <div class="nav-item" onclick="showPage('finances')" data-page="finances">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Finanzen
+      </div>
+      <div class="nav-section">System</div>
+      <div class="nav-item" onclick="showPage('settings')" data-page="settings">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Einstellungen
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sync-status">
+        <div class="sync-dot" id="syncDot"></div>
+        <span id="syncText">Verbinde...</span>
+      </div>
+      <div style="padding:4px 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="signOutGoogle()" style="width:100%;justify-content:center;">Abmelden</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="pageTitle">Dashboard</span>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+    <div class="content" id="pageContent"></div>
+  </main>
+</div>
+
+<!-- INVOICE PRINT AREA -->
+<div class="invoice-print" id="invoicePrint"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Modal</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer hidden" id="modalFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// GOOGLE API CONFIG
+// ═══════════════════════════════════════
+// WICHTIG: Trage hier deine Client ID ein (siehe Setup-Anleitung)
+const CLIENT_ID = localStorage.getItem('gClientId') || '';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SHEET_NAME_KEY = 'bsk_sheet_id';
+const SETTINGS_KEY = 'bsk_settings';
+
+let tokenClient = null;
+let accessToken = null;
+let sheetId = localStorage.getItem(SHEET_NAME_KEY) || '';
+let isReady = false;
+
+// ═══════════════════════════════════════
+// LOCAL DB (Cache)
+// ═══════════════════════════════════════
+let DB = {
+  customers: [],
+  suppliers: [],
+  products: [],
+  invoices: [],
+  offers: [],
+  employees: [],
+  timeEntries: [],
+  transactions: [],
+  settings: {
+    name: 'Bartoska Gebäudereinigung',
+    street: 'Koglstraße 25',
+    zip: '8076',
+    city: 'Vasoldsberg',
+    country: 'Österreich',
+    iban: 'AT313813300003001468',
+    bic: 'RZSTAT2G133',
+    bank: 'Raiffeisenbank Hausmannstätten',
+    uid: 'ATU59880169',
+    tel: '',
+    email: '',
+    web: 'bartoska.at',
+    logoUrl: ''
+  }
+};
+
+function loadLocalCache(){
+  try{
+    const c = localStorage.getItem('bsk_cache');
+    if(c) DB = {...DB, ...JSON.parse(c)};
+  }catch(e){}
+}
+function saveLocalCache(){
+  try{ localStorage.setItem('bsk_cache', JSON.stringify(DB)); }catch(e){}
+}
+
+// ═══════════════════════════════════════
+// GOOGLE AUTH
+// ═══════════════════════════════════════
+function initGoogleAuth(){
+  const clientId = localStorage.getItem('gClientId');
+  if(!clientId){
+    showSetup();
+    return;
+  }
+  // Load GIS
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.onload = () => {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      callback: handleTokenResponse,
+    });
+    // Check if we have a cached token
+    const cached = localStorage.getItem('gToken');
+    const exp = localStorage.getItem('gTokenExp');
+    if(cached && exp && Date.now() < parseInt(exp)){
+      accessToken = cached;
+      onAuthSuccess();
+    } else {
+      tokenClient.requestAccessToken({prompt: ''});
+    }
+  };
+  script.onerror = () => showSetup();
+  document.head.appendChild(script);
+}
+
+function handleTokenResponse(resp){
+  if(resp.error){ showSetup(); return; }
+  accessToken = resp.access_token;
+  localStorage.setItem('gToken', accessToken);
+  localStorage.setItem('gTokenExp', Date.now() + (resp.expires_in - 60) * 1000);
+  onAuthSuccess();
+}
+
+async function onAuthSuccess(){
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  setSyncStatus('loading', 'Verbinde...');
+  loadLocalCache();
+  await initSheet();
+  showPage('dashboard');
+}
+
+function signInGoogle(){
+  const clientId = document.getElementById('clientIdInput')?.value?.trim();
+  if(clientId) localStorage.setItem('gClientId', clientId);
+  if(!localStorage.getItem('gClientId')){
+    showClientIdDialog();
+    return;
+  }
+  initGoogleAuth();
+}
+
+function signOutGoogle(){
+  localStorage.removeItem('gToken');
+  localStorage.removeItem('gTokenExp');
+  accessToken = null;
+  sheetId = '';
+  document.getElementById('appScreen').style.display = 'none';
+  showSetup();
+}
+
+function showSetup(){
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+}
+
+function showClientIdDialog(){
+  openModal('Google Client ID einrichten', `
+    <p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6;">
+      Um die App mit Google Sheets zu verbinden, benötigst du eine Google OAuth Client ID.
+      Diese kannst du kostenlos in der Google Cloud Console erstellen.
+    </p>
+    <div style="background:var(--bg3);border-radius:var(--rads);padding:14px;margin-bottom:14px;font-size:12px;color:var(--tx2);line-height:1.8;">
+      <strong style="color:var(--tx);">Einmalige Einrichtung (ca. 5 Min.):</strong><br>
+      1. Gehe zu <a href="https://console.cloud.google.com" target="_blank" style="color:var(--brand);">console.cloud.google.com</a><br>
+      2. Neues Projekt erstellen → "Bartoska Business"<br>
+      3. APIs → Google Sheets API aktivieren<br>
+      4. Anmeldedaten → OAuth 2.0 Client-ID erstellen<br>
+      5. Typ: Webanwendung<br>
+      6. Autorisierte JavaScript-Quellen: deine GitHub Pages URL<br>
+      7. Client-ID hier einfügen:
+    </div>
+    <div class="field">
+      <label>Google OAuth Client ID</label>
+      <input type="text" id="clientIdInput" placeholder="xxxxxxxxxxxx.apps.googleusercontent.com" value="${localStorage.getItem('gClientId')||''}">
+    </div>
+    <p style="font-size:12px;color:var(--tx3);margin-top:8px;">Die Client ID wird nur in deinem Browser gespeichert.</p>
+  `, [
+    {label:'Speichern & Verbinden', cls:'btn-primary', fn: () => {
+      const val = document.getElementById('clientIdInput').value.trim();
+      if(!val){ toast('Bitte Client ID eingeben','err'); return; }
+      localStorage.setItem('gClientId', val);
+      closeModal();
+      initGoogleAuth();
+    }}
+  ]);
+}
+
+// ═══════════════════════════════════════
+// GOOGLE SHEETS API
+// ═══════════════════════════════════════
+async function sheetsRequest(method, path, body){
+  const url = `https://sheets.googleapis.com/v4/spreadsheets${path}`;
+  const resp = await fetch(url, {
+    method,
+    headers: {'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json'},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(!resp.ok){
+    const err = await resp.json();
+    throw new Error(err.error?.message || 'Sheets API Fehler');
+  }
+  return resp.json();
+}
+
+async function driveRequest(method, path, body){
+  const url = `https://www.googleapis.com/drive/v3${path}`;
+  const resp = await fetch(url, {
+    method,
+    headers: {'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json'},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(!resp.ok) throw new Error('Drive API Fehler');
+  return resp.json();
+}
+
+const SHEETS = ['Kunden','Lieferanten','Produkte','Rechnungen','Angebote','Mitarbeiter','Zeiterfassung','Finanzen','Einstellungen'];
+
+async function initSheet(){
+  try{
+    if(sheetId){
+      // Verify sheet still exists
+      try{
+        await sheetsRequest('GET', `/${sheetId}?fields=spreadsheetId`);
+        await loadAllData();
+        setSyncStatus('ok', 'Verbunden');
+        isReady = true;
+        return;
+      }catch(e){ sheetId = ''; localStorage.removeItem(SHEET_NAME_KEY); }
+    }
+    // Create new spreadsheet
+    setSyncStatus('loading', 'Erstelle Sheet...');
+    const resp = await sheetsRequest('POST', '', {
+      properties: {title: 'Bartoska Business Pro'},
+      sheets: SHEETS.map(s => ({properties:{title:s}}))
+    });
+    sheetId = resp.spreadsheetId;
+    localStorage.setItem(SHEET_NAME_KEY, sheetId);
+    // Write headers
+    await writeHeaders();
+    // Write initial settings
+    await saveSettings();
+    setSyncStatus('ok', 'Verbunden');
+    isReady = true;
+    toast('Google Sheet erstellt! ✓', 'ok');
+  }catch(e){
+    console.error(e);
+    setSyncStatus('err', 'Offline (Cache)');
+    isReady = false;
+    toast('Offline — Daten aus Cache geladen', 'err');
+  }
+}
+
+const HEADERS = {
+  Kunden: ['ID','Name','Straße','PLZ','Stadt','Land','Email','Telefon','UID'],
+  Lieferanten: ['ID','Name','Straße','PLZ','Stadt','Land','Email','Telefon','UID'],
+  Produkte: ['ID','Artikelnr','Typ','Name','Beschreibung','Einheit','PreisNetto','MwSt'],
+  Rechnungen: ['ID','Nummer','Typ','Datum','Fälligkeit','BezahltAm','KundenID','Status','ReverseCharge','Positionen','Notizen','InterneNotiz'],
+  Angebote: ['ID','Nummer','Datum','KundenID','Status','Positionen','Notizen'],
+  Mitarbeiter: ['ID','Vorname','Nachname','Position','Stundensatz','Email','Telefon','EintrittAm','SollStunden','Urlaub'],
+  Zeiterfassung: ['ID','MitarbeiterID','Datum','Stunden','Typ','Beschreibung','KundenID'],
+  Finanzen: ['ID','Datum','Betrag','Kategorie','Beschreibung','Typ','MwSt'],
+  Einstellungen: ['Key','Value']
+};
+
+async function writeHeaders(){
+  const requests = SHEETS.map(sheet => ({
+    range: `${sheet}!A1`,
+    values: [HEADERS[sheet]]
+  }));
+  await sheetsRequest('POST', `/${sheetId}/values:batchUpdate`, {
+    valueInputOption: 'RAW',
+    data: requests
+  });
+}
+
+async function loadAllData(){
+  setSyncStatus('loading', 'Lade Daten...');
+  const ranges = SHEETS.map(s => `${s}!A:Z`);
+  const resp = await sheetsRequest('GET', `/${sheetId}/values:batchGet?ranges=${ranges.map(encodeURIComponent).join('&ranges=')}`);
+  const vrs = resp.valueRanges;
+
+  DB.customers = parseSheet(vrs[0]?.values, rowToCustomer);
+  DB.suppliers = parseSheet(vrs[1]?.values, rowToSupplier);
+  DB.products = parseSheet(vrs[2]?.values, rowToProduct);
+  DB.invoices = parseSheet(vrs[3]?.values, rowToInvoice);
+  DB.offers = parseSheet(vrs[4]?.values, rowToOffer);
+  DB.employees = parseSheet(vrs[5]?.values, rowToEmployee);
+  DB.timeEntries = parseSheet(vrs[6]?.values, rowToTime);
+  DB.transactions = parseSheet(vrs[7]?.values, rowToTransaction);
+
+  // Settings
+  const settRows = vrs[8]?.values || [];
+  settRows.slice(1).forEach(r => {
+    if(r[0] && r[1] !== undefined) DB.settings[r[0]] = r[1];
+  });
+
+  saveLocalCache();
+  setSyncStatus('ok', 'Verbunden');
+}
+
+function parseSheet(values, mapFn){
+  if(!values || values.length < 2) return [];
+  return values.slice(1).filter(r => r[0]).map(mapFn);
+}
+
+// Row mappers
+function rowToCustomer(r){ return {id:r[0]||'',name:r[1]||'',street:r[2]||'',zip:r[3]||'',city:r[4]||'',country:r[5]||'Österreich',email:r[6]||'',phone:r[7]||'',uid:r[8]||''}; }
+function rowToSupplier(r){ return {id:r[0]||'',name:r[1]||'',street:r[2]||'',zip:r[3]||'',city:r[4]||'',country:r[5]||'Österreich',email:r[6]||'',phone:r[7]||'',uid:r[8]||''}; }
+function rowToProduct(r){ return {id:r[0]||'',articleNumber:r[1]||'',type:r[2]||'service',name:r[3]||'',description:r[4]||'',unit:r[5]||'Stk',priceNet:parseFloat(r[6])||0,taxRate:parseFloat(r[7])||20}; }
+function rowToInvoice(r){ return {id:r[0]||'',number:r[1]||'',type:r[2]||'invoice',date:r[3]||'',dueDate:r[4]||'',paidDate:r[5]||'',customerId:r[6]||'',status:r[7]||'draft',isReverseCharge:r[8]==='true',items:tryJSON(r[9],[]),notes:r[10]||'',internalNote:r[11]||''}; }
+function rowToOffer(r){ return {id:r[0]||'',number:r[1]||'',date:r[2]||'',customerId:r[3]||'',status:r[4]||'draft',items:tryJSON(r[5],[]),notes:r[6]||''}; }
+function rowToEmployee(r){ return {id:r[0]||'',firstName:r[1]||'',lastName:r[2]||'',position:r[3]||'',hourlyRate:parseFloat(r[4])||0,email:r[5]||'',phone:r[6]||'',entryDate:r[7]||'',targetWeeklyHours:parseFloat(r[8])||0,vacationDaysPerYear:parseFloat(r[9])||25}; }
+function rowToTime(r){ return {id:r[0]||'',employeeId:r[1]||'',date:r[2]||'',hours:parseFloat(r[3])||0,type:r[4]||'work',description:r[5]||'',customerId:r[6]||''}; }
+function rowToTransaction(r){ return {id:r[0]||'',date:r[1]||'',amount:parseFloat(r[2])||0,category:r[3]||'',description:r[4]||'',type:r[5]||'income',taxRate:parseFloat(r[6])||0}; }
+
+// Row serializers
+function customerToRow(c){ return [c.id,c.name,c.street,c.zip,c.city,c.country||'Österreich',c.email,c.phone,c.uid||'']; }
+function supplierToRow(c){ return [c.id,c.name,c.street,c.zip,c.city,c.country||'Österreich',c.email,c.phone,c.uid||'']; }
+function productToRow(p){ return [p.id,p.articleNumber||'',p.type,p.name,p.description,p.unit,p.priceNet,p.taxRate]; }
+function invoiceToRow(inv){ return [inv.id,inv.number,inv.type,inv.date,inv.dueDate,inv.paidDate||'',inv.customerId,inv.status,inv.isReverseCharge?'true':'false',JSON.stringify(inv.items),inv.notes,inv.internalNote||'']; }
+function offerToRow(o){ return [o.id,o.number,o.date,o.customerId,o.status,JSON.stringify(o.items),o.notes]; }
+function employeeToRow(e){ return [e.id,e.firstName,e.lastName,e.position,e.hourlyRate,e.email||'',e.phone||'',e.entryDate||'',e.targetWeeklyHours||0,e.vacationDaysPerYear||25]; }
+function timeToRow(t){ return [t.id,t.employeeId,t.date,t.hours,t.type,t.description||'',t.customerId||'']; }
+function transactionToRow(t){ return [t.id,t.date,t.amount,t.category,t.description,t.type,t.taxRate||0]; }
+
+function tryJSON(str, def){ try{ return JSON.parse(str); }catch(e){ return def; } }
+
+// Write full sheet
+async function writeSheet(sheetName, rows, toRow){
+  if(!isReady || !sheetId) return;
+  const values = [HEADERS[sheetName], ...rows.map(toRow)];
+  await sheetsRequest('PUT', `/${sheetId}/values/${encodeURIComponent(sheetName+'!A1')}?valueInputOption=RAW`, {
+    range: sheetName+'!A1', majorDimension: 'ROWS', values
+  });
+  saveLocalCache();
+}
+
+async function saveSettings(){
+  if(!isReady || !sheetId) return;
+  const rows = [HEADERS.Einstellungen, ...Object.entries(DB.settings)];
+  await sheetsRequest('PUT', `/${sheetId}/values/${encodeURIComponent('Einstellungen!A1')}?valueInputOption=RAW`, {
+    range: 'Einstellungen!A1', majorDimension: 'ROWS', values: rows
+  });
+  saveLocalCache();
+}
+
+// Convenience save functions
+async function saveCustomers(){ await writeSheet('Kunden', DB.customers, customerToRow); }
+async function saveSuppliers(){ await writeSheet('Lieferanten', DB.suppliers, supplierToRow); }
+async function saveProducts(){ await writeSheet('Produkte', DB.products, productToRow); }
+async function saveInvoices(){ await writeSheet('Rechnungen', DB.invoices, invoiceToRow); }
+async function saveOffers(){ await writeSheet('Angebote', DB.offers, offerToRow); }
+async function saveEmployees(){ await writeSheet('Mitarbeiter', DB.employees, employeeToRow); }
+async function saveTimeEntries(){ await writeSheet('Zeiterfassung', DB.timeEntries, timeToRow); }
+async function saveTransactions(){ await writeSheet('Finanzen', DB.transactions, transactionToRow); }
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function addDays(dateStr, days){ const d=new Date(dateStr); d.setDate(d.getDate()+days); return d.toISOString().split('T')[0]; }
+function fmtDate(d){ if(!d)return'—'; return new Date(d+'T00:00:00').toLocaleDateString('de-AT'); }
+function fmtMoney(n){ return (parseFloat(n)||0).toLocaleString('de-AT',{style:'currency',currency:'EUR'}); }
+function fmtMoneyPlain(n){ return (parseFloat(n)||0).toFixed(2).replace('.',','); }
+function setSyncStatus(s,t){ const d=document.getElementById('syncDot'),tx=document.getElementById('syncText'); if(d){d.className='sync-dot'+(s==='ok'?' ok':s==='err'?' err':' loading');} if(tx)tx.textContent=t; }
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._to); t._to=setTimeout(()=>t.className='toast',2800);
+}
+function calcInvoiceTotals(items, isRC){
+  let net=0,tax=0;
+  items.forEach(it=>{
+    const line=parseFloat(it.quantity||0)*parseFloat(it.priceSingleNet||0);
+    net+=line;
+    if(!isRC) tax+=line*(parseFloat(it.taxRate||0)/100);
+  });
+  return {net, tax, gross: net+tax};
+}
+function getCustomerName(id){ const c=DB.customers.find(x=>x.id===id); return c?c.name:id||'—'; }
+function getSupplierName(id){ const c=DB.suppliers.find(x=>x.id===id); return c?c.name:id||'—'; }
+function getEmployeeName(id){ const e=DB.employees.find(x=>x.id===id); return e?`${e.firstName} ${e.lastName}`:id||'—'; }
+function statusBadge(s){ const m={draft:'badge-gray Entwurf',sent:'badge-blue Gesendet',paid:'badge-green Bezahlt',accepted:'badge-green Angenommen',rejected:'badge-red Abgelehnt'}; const [cls,label]=(m[s]||'badge-gray '+s).split(' '); return `<span class="badge ${cls}">${label||s}</span>`; }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+let currentPage = 'dashboard';
+function showPage(page){
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  const titles = {dashboard:'Dashboard',invoices:'Rechnungen',offers:'Angebote',customers:'Kunden',suppliers:'Lieferanten',products:'Produkte',employees:'Mitarbeiter',time:'Zeiterfassung',finances:'Finanzen',settings:'Einstellungen'};
+  document.getElementById('pageTitle').textContent = titles[page]||page;
+  closeSidebar();
+  const pages = {dashboard:renderDashboard,invoices:renderInvoices,offers:renderOffers,customers:renderCustomers,suppliers:renderSuppliers,products:renderProducts,employees:renderEmployees,time:renderTime,finances:renderFinances,settings:renderSettings};
+  if(pages[page]) pages[page]();
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal(title, body, btns=[]){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  const footer = document.getElementById('modalFooter');
+  if(btns.length){
+    footer.classList.remove('hidden');
+    footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>` +
+      btns.map(b=>`<button class="btn ${b.cls}" onclick="(${b.fn.toString()})()">${b.label}</button>`).join('');
+  } else {
+    footer.classList.add('hidden');
+    footer.innerHTML = '';
+  }
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal(){ document.getElementById('modal').classList.add('hidden'); }
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+function renderDashboard(){
+  document.getElementById('topbarActions').innerHTML = '';
+  const now = new Date();
+  const thisMonth = now.toISOString().slice(0,7);
+  const invoicesThisMonth = DB.invoices.filter(i=>i.date.startsWith(thisMonth)&&i.type==='invoice');
+  const revenueMonth = invoicesThisMonth.reduce((s,i)=>{
+    const t=calcInvoiceTotals(i.items,i.isReverseCharge); return s+t.gross;
+  },0);
+  const openInvoices = DB.invoices.filter(i=>i.status==='sent'&&i.type==='invoice');
+  const openAmount = openInvoices.reduce((s,i)=>{ const t=calcInvoiceTotals(i.items,i.isReverseCharge); return s+t.gross; },0);
+  const overdueInvoices = openInvoices.filter(i=>i.dueDate&&i.dueDate<today());
+  const expensesMonth = DB.transactions.filter(t=>t.type==='expense'&&t.date.startsWith(thisMonth)).reduce((s,t)=>s+Math.abs(t.amount),0);
+
+  const recentInvoices = [...DB.invoices].filter(i=>i.type==='invoice').sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+
+  document.getElementById('pageContent').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff;color:#2563eb;float:right;">💰</div>
+        <div class="stat-label">Umsatz ${now.toLocaleDateString('de-AT',{month:'long'})}</div>
+        <div class="stat-value">${fmtMoneyPlain(revenueMonth)} €</div>
+        <div class="stat-sub">${invoicesThisMonth.length} Rechnung(en)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706;float:right;">⏳</div>
+        <div class="stat-label">Offene Rechnungen</div>
+        <div class="stat-value">${fmtMoneyPlain(openAmount)} €</div>
+        <div class="stat-sub">${openInvoices.length} offen${overdueInvoices.length?' · '+overdueInvoices.length+' überfällig':''}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2;color:#dc2626;float:right;">📤</div>
+        <div class="stat-label">Ausgaben ${now.toLocaleDateString('de-AT',{month:'long'})}</div>
+        <div class="stat-value">${fmtMoneyPlain(expensesMonth)} €</div>
+        <div class="stat-sub">${DB.transactions.filter(t=>t.type==='expense'&&t.date.startsWith(thisMonth)).length} Buchung(en)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;color:#16a34a;float:right;">👥</div>
+        <div class="stat-label">Kunden</div>
+        <div class="stat-value">${DB.customers.length}</div>
+        <div class="stat-sub">${DB.employees.length} Mitarbeiter</div>
+      </div>
+    </div>
+
+    ${overdueInvoices.length ? `
+    <div class="card" style="margin-bottom:16px;border-color:#fca5a5;">
+      <div class="card-header" style="background:#fff5f5;">
+        <span class="card-title" style="color:var(--red);">⚠ ${overdueInvoices.length} überfällige Rechnung(en)</span>
+        <button class="btn btn-sm btn-secondary" onclick="showPage('invoices')">Anzeigen</button>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Nummer</th><th>Kunde</th><th>Fällig</th><th>Betrag</th></tr></thead>
+          <tbody>${overdueInvoices.map(i=>{ const t=calcInvoiceTotals(i.items,i.isReverseCharge); return `<tr onclick="showPage('invoices')"><td><span style="font-family:'DM Mono';font-size:12px;">${i.number}</span></td><td>${getCustomerName(i.customerId)}</td><td style="color:var(--red);">${fmtDate(i.dueDate)}</td><td style="font-family:'DM Mono';">${fmtMoneyPlain(t.gross)} €</td></tr>`;}).join('')}
+          </tbody>
+        </table></div>
+      </div>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Letzte Rechnungen</span>
+        <button class="btn btn-sm btn-primary" onclick="showPage('invoices')">Alle anzeigen</button>
+      </div>
+      <div class="card-body" style="padding:0;">
+        ${recentInvoices.length ? `<div class="table-wrap"><table>
+          <thead><tr><th>Nummer</th><th>Kunde</th><th>Datum</th><th>Betrag</th><th>Status</th></tr></thead>
+          <tbody>${recentInvoices.map(i=>{ const t=calcInvoiceTotals(i.items,i.isReverseCharge); return `<tr onclick="openInvoiceDetail('${i.id}')"><td><span style="font-family:'DM Mono';font-size:12px;">${i.number}</span></td><td>${getCustomerName(i.customerId)}</td><td>${fmtDate(i.date)}</td><td style="font-family:'DM Mono';">${fmtMoneyPlain(t.gross)} €</td><td>${statusBadge(i.status)}</td></tr>`;}).join('')}</tbody>
+        </table></div>` : '<div class="empty"><div class="empty-ico">📄</div><p>Noch keine Rechnungen</p></div>'}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// INVOICES & OFFERS
+// ═══════════════════════════════════════
+function renderInvoiceList(type){
+  const items = type==='invoice' ? DB.invoices.filter(i=>i.type==='invoice') : DB.offers;
+  const isInvoice = type==='invoice';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="openInvoiceForm('${type}')">+ ${isInvoice?'Rechnung':'Angebot'}</button>`;
+  const sorted = [...items].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('pageContent').innerHTML = `
+    <div class="search-bar"><input class="search-input" placeholder="${isInvoice?'Rechnungen':'Angebote'} suchen..." oninput="filterList(this,'inv-tbody','${type}')"></div>
+    <div class="card">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nummer</th><th>Kunde</th><th>Datum</th>${isInvoice?'<th>Fällig</th>':''}${isInvoice?'<th>Betrag</th>':'<th>Betrag</th>'}<th>Status</th><th></th></tr></thead>
+        <tbody id="inv-tbody">${sorted.length?sorted.map(i=>invoiceRow(i,isInvoice)).join(''):'<tr><td colspan="7"><div class="empty"><div class="empty-ico">📄</div><p>Noch keine Einträge</p></div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+}
+function renderInvoices(){ renderInvoiceList('invoice'); }
+function renderOffers(){ renderInvoiceList('offer'); }
+
+function invoiceRow(i, isInvoice){
+  const t = calcInvoiceTotals(i.items, i.isReverseCharge);
+  return `<tr>
+    <td><span style="font-family:'DM Mono';font-size:12px;">${i.number}</span></td>
+    <td>${getCustomerName(i.customerId)}</td>
+    <td>${fmtDate(i.date)}</td>
+    ${isInvoice?`<td style="${i.dueDate&&i.dueDate<today()&&i.status!='paid'?'color:var(--red);font-weight:600;':''}">${fmtDate(i.dueDate)}</td>`:''}
+    <td style="font-family:'DM Mono';">${fmtMoneyPlain(t.gross)} €</td>
+    <td>${statusBadge(i.status)}</td>
+    <td><button class="btn btn-sm btn-secondary" onclick="openInvoiceDetail('${i.id}')">Details</button></td>
+  </tr>`;
+}
+
+function filterList(input, tbodyId, type){
+  const q = input.value.toLowerCase();
+  const tbody = document.getElementById(tbodyId);
+  if(!tbody) return;
+  const items = type==='invoice'?DB.invoices.filter(i=>i.type==='invoice'):DB.offers;
+  const filtered = items.filter(i=>
+    i.number.toLowerCase().includes(q)||
+    getCustomerName(i.customerId).toLowerCase().includes(q)
+  );
+  tbody.innerHTML = filtered.length ? filtered.map(i=>invoiceRow(i,type==='invoice')).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:20px;">Keine Treffer</td></tr>';
+}
+
+function openInvoiceForm(type, existing){
+  const isEdit = !!existing;
+  const inv = existing || {
+    id: uid(), number: nextNumber(type), type,
+    date: today(), dueDate: addDays(today(),14),
+    customerId: DB.customers[0]?.id||'',
+    items: [{id:uid(),description:'',quantity:1,unit:'Pauschale',priceSingleNet:0,taxRate:20}],
+    notes: '', internalNote: '', isReverseCharge: false, status: 'draft'
+  };
+
+  const customerOpts = DB.customers.map(c=>`<option value="${c.id}" ${c.id===inv.customerId?'selected':''}>${c.name}</option>`).join('');
+  const productOpts = DB.products.map(p=>`<option value="${p.id}">${p.name} (${fmtMoneyPlain(p.priceNet)} €)</option>`).join('');
+
+  openModal(isEdit?`${type==='invoice'?'Rechnung':'Angebot'} bearbeiten`:`Neue ${type==='invoice'?'Rechnung':'Angebot'}`, `
+    <div class="form-grid">
+      <div class="field"><label>Nummer</label><input id="fNum" value="${inv.number}"></div>
+      <div class="field"><label>Datum</label><input type="date" id="fDate" value="${inv.date}" onchange="updateDue()"></div>
+      ${type==='invoice'?`<div class="field"><label>Fällig am</label><input type="date" id="fDue" value="${inv.dueDate}"></div>`:''}
+      <div class="field ${type==='invoice'?'':'form-full'}"><label>Kunde</label><select id="fCust">${customerOpts}</select></div>
+      ${type==='invoice'?`<div class="field form-full"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="fRC" ${inv.isReverseCharge?'checked':''} onchange="updateTotals()"> Reverse Charge (Steuerschuldnerschaft des Leistungsempfängers)</label></div>`:''}
+    </div>
+
+    <div style="margin:14px 0 8px;font-size:12px;font-weight:600;color:var(--tx2);">POSITIONEN</div>
+    <div style="margin-bottom:6px;">
+      <select id="productPicker" onchange="addProductFromPicker()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rads);background:var(--bg3);color:var(--tx);">
+        <option value="">+ Produkt/Leistung aus Liste wählen...</option>
+        ${productOpts}
+      </select>
+    </div>
+    <table class="items-table">
+      <thead><tr><th style="width:40%">Beschreibung</th><th>Menge</th><th>Einheit</th><th>EP (Netto)</th><th>MwSt%</th><th>Gesamt</th><th></th></tr></thead>
+      <tbody id="itemsBody"></tbody>
+    </table>
+    <button class="btn btn-secondary btn-sm" onclick="addItem()" style="margin-bottom:12px;">+ Position</button>
+
+    <div id="totalsArea"></div>
+
+    <div class="form-grid" style="margin-top:12px;">
+      <div class="field form-full"><label>Notizen (erscheinen auf PDF)</label><textarea id="fNotes">${inv.notes||''}</textarea></div>
+      ${type==='invoice'?`<div class="field form-full"><label>Interne Notiz (nicht auf PDF)</label><textarea id="fIntNote">${inv.internalNote||''}</textarea></div>`:''}
+      ${type==='invoice'?`<div class="field"><label>Status</label><select id="fStatus"><option value="draft" ${inv.status==='draft'?'selected':''}>Entwurf</option><option value="sent" ${inv.status==='sent'?'selected':''}>Gesendet</option><option value="paid" ${inv.status==='paid'?'selected':''}>Bezahlt</option></select></div>`:''}
+      ${type==='invoice'?`<div class="field"><label>Bezahlt am</label><input type="date" id="fPaidDate" value="${inv.paidDate||''}"></div>`:''}
+    </div>`,
+  [{label: isEdit?'Speichern':'Erstellen', cls:'btn-primary', fn: () => saveInvoiceForm(type, inv.id, isEdit)},
+   ...(isEdit?[{label:'Löschen', cls:'btn-danger', fn:()=>deleteInvoice(inv.id,type)}]:[])
+  ]);
+
+  // Store items in memory for editing
+  window._editItems = inv.items.map(i=>({...i}));
+  renderItems();
+  updateTotals();
+}
+
+function renderItems(){
+  const isRC = document.getElementById('fRC')?.checked||false;
+  document.getElementById('itemsBody').innerHTML = (window._editItems||[]).map((it,i)=>`
+    <tr>
+      <td><input value="${it.description}" oninput="window._editItems[${i}].description=this.value;updateTotals()" style="min-width:120px;"></td>
+      <td><input type="number" value="${it.quantity}" style="width:60px;" oninput="window._editItems[${i}].quantity=parseFloat(this.value)||0;updateLine(${i})"></td>
+      <td><input value="${it.unit}" style="width:70px;" oninput="window._editItems[${i}].unit=this.value"></td>
+      <td><input type="number" value="${it.priceSingleNet}" style="width:80px;" oninput="window._editItems[${i}].priceSingleNet=parseFloat(this.value)||0;updateLine(${i})"></td>
+      <td><input type="number" value="${it.taxRate}" style="width:50px;" ${isRC?'disabled':''} oninput="window._editItems[${i}].taxRate=parseFloat(this.value)||0;updateLine(${i})"></td>
+      <td id="line${i}" style="font-family:'DM Mono';font-size:12px;white-space:nowrap;">${fmtMoneyPlain((it.quantity||0)*(it.priceSingleNet||0))} €</td>
+      <td><button class="item-del" onclick="removeItem(${i})">✕</button></td>
+    </tr>`).join('');
+}
+function updateLine(i){ const it=window._editItems[i]; const el=document.getElementById('line'+i); if(el) el.textContent=fmtMoneyPlain((it.quantity||0)*(it.priceSingleNet||0))+' €'; updateTotals(); }
+function addItem(){ window._editItems.push({id:uid(),description:'',quantity:1,unit:'Pauschale',priceSingleNet:0,taxRate:20}); renderItems(); updateTotals(); }
+function removeItem(i){ window._editItems.splice(i,1); renderItems(); updateTotals(); }
+function updateDue(){ const d=document.getElementById('fDate'); const du=document.getElementById('fDue'); if(d&&du) du.value=addDays(d.value,14); }
+function addProductFromPicker(){
+  const sel = document.getElementById('productPicker');
+  const p = DB.products.find(x=>x.id===sel.value);
+  if(!p){ return; }
+  const isRC = document.getElementById('fRC')?.checked||false;
+  window._editItems.push({id:uid(),description:p.name+(p.description?' — '+p.description:''),quantity:1,unit:p.unit,priceSingleNet:p.priceNet,taxRate:isRC?0:p.taxRate});
+  renderItems(); updateTotals(); sel.value='';
+}
+function updateTotals(){
+  const isRC = document.getElementById('fRC')?.checked||false;
+  const t = calcInvoiceTotals(window._editItems||[], isRC);
+  const el = document.getElementById('totalsArea');
+  if(el) el.innerHTML = `<div class="totals">
+    <div class="total-row"><span>Netto</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.net)} €</span></div>
+    ${isRC?'<div class="total-row"><span style="color:var(--tx3);">MwSt (Reverse Charge)</span><span style="color:var(--tx3);font-family:\'DM Mono\';">0,00 €</span></div>':''}
+    ${!isRC?`<div class="total-row"><span>MwSt</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.tax)} €</span></div>`:''}
+    <div class="total-row final"><span>Gesamt Brutto</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.gross)} €</span></div>
+  </div>`;
+  // Reload items to update disabled state on MwSt field
+  renderItems();
+}
+
+async function saveInvoiceForm(type, id, isEdit){
+  const num = document.getElementById('fNum').value.trim();
+  const custId = document.getElementById('fCust').value;
+  const date = document.getElementById('fDate').value;
+  if(!num||!custId||!date){ toast('Bitte alle Pflichtfelder ausfüllen','err'); return; }
+  const isRC = document.getElementById('fRC')?.checked||false;
+  const obj = {
+    id, number: num, type,
+    date, dueDate: document.getElementById('fDue')?.value||addDays(date,14),
+    paidDate: document.getElementById('fPaidDate')?.value||'',
+    customerId: custId,
+    items: (window._editItems||[]).map(i=>({...i,taxRate:isRC?0:i.taxRate})),
+    notes: document.getElementById('fNotes')?.value||'',
+    internalNote: document.getElementById('fIntNote')?.value||'',
+    isReverseCharge: isRC,
+    status: document.getElementById('fStatus')?.value||'draft'
+  };
+  setSyncStatus('loading','Speichere...');
+  if(type==='invoice'){
+    if(isEdit) DB.invoices = DB.invoices.map(i=>i.id===id?obj:i);
+    else DB.invoices.push(obj);
+    await saveInvoices();
+  } else {
+    if(isEdit) DB.offers = DB.offers.map(o=>o.id===id?obj:o);
+    else DB.offers.push(obj);
+    await saveOffers();
+  }
+  setSyncStatus('ok','Gespeichert');
+  closeModal();
+  toast('Gespeichert ✓','ok');
+  type==='invoice'?renderInvoices():renderOffers();
+}
+
+async function deleteInvoice(id, type){
+  if(!confirm('Wirklich löschen?')) return;
+  if(type==='invoice'){ DB.invoices=DB.invoices.filter(i=>i.id!==id); await saveInvoices(); }
+  else { DB.offers=DB.offers.filter(o=>o.id!==id); await saveOffers(); }
+  closeModal(); toast('Gelöscht','ok');
+  type==='invoice'?renderInvoices():renderOffers();
+}
+
+function nextNumber(type){
+  const y=new Date().getFullYear();
+  if(type==='invoice'){
+    const nums=DB.invoices.filter(i=>i.number.includes(String(y))).map(i=>parseInt(i.number.split('-').pop())||0);
+    const n=(Math.max(0,...nums)+1).toString().padStart(3,'0');
+    return `RE-${y}-${n}`;
+  } else {
+    const nums=DB.offers.map(o=>parseInt(o.number.split('-').pop())||0);
+    const n=(Math.max(0,...nums)+1).toString().padStart(3,'0');
+    return `ANG-${y}-${n}`;
+  }
+}
+
+function openInvoiceDetail(id){
+  const inv = DB.invoices.find(i=>i.id===id)||DB.offers.find(i=>i.id===id);
+  if(!inv) return;
+  const cust = DB.customers.find(c=>c.id===inv.customerId)||{name:'—',street:'',zip:'',city:''};
+  const t = calcInvoiceTotals(inv.items, inv.isReverseCharge);
+  const isInvoice = inv.type==='invoice';
+  openModal(`${isInvoice?'Rechnung':'Angebot'} ${inv.number}`, `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      ${statusBadge(inv.status)}
+      <span style="font-size:12px;color:var(--tx3);">${fmtDate(inv.date)}</span>
+      ${isInvoice&&inv.dueDate?`<span style="font-size:12px;color:${inv.dueDate<today()&&inv.status!='paid'?'var(--red)':'var(--tx3)'};">Fällig: ${fmtDate(inv.dueDate)}</span>`:''}
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:2px;">${cust.name}</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;">${cust.street}, ${cust.zip} ${cust.city}</div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px;">
+      <thead><tr style="border-bottom:1px solid var(--border);">${['Beschreibung','Menge','EP','MwSt','Gesamt'].map(h=>`<th style="padding:6px 8px;text-align:left;color:var(--tx3);">${h}</th>`).join('')}</tr></thead>
+      <tbody>${inv.items.map(it=>`<tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 8px;">${it.description}</td><td style="padding:6px 8px;">${it.quantity} ${it.unit}</td><td style="padding:6px 8px;font-family:'DM Mono';">${fmtMoneyPlain(it.priceSingleNet)} €</td><td style="padding:6px 8px;">${inv.isReverseCharge?'RC':it.taxRate+'%'}</td><td style="padding:6px 8px;font-family:'DM Mono';">${fmtMoneyPlain(it.quantity*it.priceSingleNet)} €</td></tr>`).join('')}</tbody>
+    </table>
+    <div class="totals">
+      <div class="total-row"><span>Netto</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.net)} €</span></div>
+      <div class="total-row"><span>MwSt</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.tax)} €</span></div>
+      <div class="total-row final"><span>Brutto</span><span style="font-family:'DM Mono';">${fmtMoneyPlain(t.gross)} €</span></div>
+    </div>
+    ${inv.notes?`<div style="margin-top:10px;font-size:12px;color:var(--tx2);padding:8px;background:var(--bg3);border-radius:var(--rads);">${inv.notes}</div>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn btn-secondary btn-sm" onclick="openInvoiceForm('${inv.type}',DB.${inv.type==='invoice'?'invoices':'offers'}.find(i=>i.id==='${id}'));closeModal()">Bearbeiten</button>
+      <button class="btn btn-secondary btn-sm" onclick="printInvoice('${id}')">🖨 Drucken</button>
+      ${isInvoice&&inv.status!=='paid'?`<button class="btn btn-sm" style="background:var(--green-l);color:var(--green);border-color:#86efac;" onclick="markPaid('${id}')">✓ Als bezahlt markieren</button>`:''}
+    </div>`);
+}
+
+async function markPaid(id){
+  const inv = DB.invoices.find(i=>i.id===id);
+  if(!inv) return;
+  inv.status='paid'; inv.paidDate=today();
+  await saveInvoices();
+  closeModal(); toast('Als bezahlt markiert ✓','ok'); renderInvoices();
+}
+
+// ═══════════════════════════════════════
+// PRINT INVOICE
+// ═══════════════════════════════════════
+function printInvoice(id){
+  const inv = DB.invoices.find(i=>i.id===id)||DB.offers.find(i=>i.id===id);
+  if(!inv) return;
+  const cust = DB.customers.find(c=>c.id===inv.customerId)||{name:'',street:'',zip:'',city:'',country:''};
+  const s = DB.settings;
+  const t = calcInvoiceTotals(inv.items, inv.isReverseCharge);
+  const isInvoice = inv.type==='invoice';
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${inv.number}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:10pt;color:#111;max-width:210mm;margin:0 auto;padding:15mm;}
+  .hdr{display:flex;justify-content:space-between;margin-bottom:20mm;}
+  .company{font-size:9pt;color:#555;line-height:1.7;}
+  .company strong{font-size:12pt;color:#111;display:block;margin-bottom:4px;}
+  .cust{margin-top:8mm;margin-bottom:8mm;}
+  .cust .label{font-size:8pt;color:#aaa;margin-bottom:3px;}
+  h1{font-size:16pt;font-weight:700;margin-bottom:4px;}
+  .meta{font-size:9pt;color:#555;margin-bottom:8mm;}
+  table{width:100%;border-collapse:collapse;margin-bottom:6mm;}
+  th{background:#f5f5f5;padding:5px 8px;text-align:left;font-size:8pt;font-weight:600;border-bottom:1px solid #ddd;}
+  td{padding:5px 8px;font-size:9pt;border-bottom:.5px solid #eee;}
+  .tot{text-align:right;}
+  .tot-row{display:flex;justify-content:flex-end;gap:40px;font-size:9pt;padding:2px 0;}
+  .tot-row.final{font-weight:700;font-size:11pt;border-top:1px solid #ccc;margin-top:4px;padding-top:6px;}
+  .notes{font-size:9pt;color:#555;margin-top:6mm;line-height:1.6;}
+  .footer{margin-top:12mm;padding-top:4mm;border-top:.5px solid #ddd;font-size:8pt;color:#aaa;display:flex;justify-content:space-between;}
+  @media print{@page{margin:0;size:A4;}body{padding:15mm;}}</style></head><body>
+  <div class="hdr">
+    <div class="company"><strong>${s.name}</strong>${s.street}<br>${s.zip} ${s.city}<br>${s.country||'Österreich'}<br>${s.tel?'Tel: '+s.tel+'<br>':''}${s.email?s.email+'<br>':''}</div>
+    <div class="company" style="text-align:right;">UID: ${s.uid}<br>IBAN: ${s.iban}<br>BIC: ${s.bic}<br>${s.bank}</div>
+  </div>
+  <div class="cust"><div class="label">${isInvoice?'RECHNUNG AN':'ANGEBOT FÜR'}</div><strong>${cust.name}</strong><br>${cust.street}<br>${cust.zip} ${cust.city}</div>
+  <h1>${isInvoice?'Rechnung':'Angebot'} ${inv.number}</h1>
+  <div class="meta">Datum: ${fmtDate(inv.date)}${isInvoice&&inv.dueDate?' &nbsp;|&nbsp; Fällig: '+fmtDate(inv.dueDate):''}</div>
+  <table><thead><tr><th>Beschreibung</th><th>Menge</th><th>Einheit</th><th style="text-align:right;">Einzelpreis</th><th style="text-align:right;">MwSt</th><th style="text-align:right;">Gesamt</th></tr></thead>
+  <tbody>${inv.items.map(it=>`<tr><td>${it.description}</td><td>${it.quantity}</td><td>${it.unit}</td><td style="text-align:right;">${fmtMoneyPlain(it.priceSingleNet)} €</td><td style="text-align:right;">${inv.isReverseCharge?'RC':it.taxRate+'%'}</td><td style="text-align:right;">${fmtMoneyPlain(it.quantity*it.priceSingleNet)} €</td></tr>`).join('')}</tbody></table>
+  <div class="tot">
+    <div class="tot-row"><span>Netto</span><span>${fmtMoneyPlain(t.net)} €</span></div>
+    ${inv.isReverseCharge?'<div class="tot-row"><span>MwSt (Reverse Charge)</span><span>0,00 €</span></div>':'<div class="tot-row"><span>MwSt</span><span>'+fmtMoneyPlain(t.tax)+' €</span></div>'}
+    <div class="tot-row final"><span>Gesamtbetrag</span><span>${fmtMoneyPlain(t.gross)} €</span></div>
+  </div>
+  ${inv.notes?`<div class="notes">${inv.notes}</div>`:''}
+  <div class="footer"><span>${s.name} · ${s.street} · ${s.zip} ${s.city}</span><span>${s.web||''}</span></div>
+  </body></html>`);
+  win.document.close(); setTimeout(()=>win.print(),300);
+}
+
+// ═══════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════
+function renderCustomers(){ renderContactList('customers'); }
+function renderSuppliers(){ renderContactList('suppliers'); }
+
+function renderContactList(type){
+  const isCustomer = type==='customers';
+  const items = isCustomer ? DB.customers : DB.suppliers;
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="openContactForm('${type}')">+ ${isCustomer?'Kunde':'Lieferant'}</button>`;
+  const sorted = [...items].sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('pageContent').innerHTML = `
+    <div class="search-bar"><input class="search-input" placeholder="${isCustomer?'Kunden':'Lieferanten'} suchen..." oninput="filterContacts(this,'${type}')"></div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Stadt</th><th>E-Mail</th><th>Telefon</th><th>UID</th><th></th></tr></thead>
+      <tbody id="contact-tbody">${sorted.length?sorted.map(c=>contactRow(c,type)).join(''):'<tr><td colspan="6"><div class="empty"><div class="empty-ico">👥</div><p>Noch keine Einträge</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+function contactRow(c,type){ return `<tr><td><strong style="font-size:13px;">${c.name}</strong><br><span style="font-size:11px;color:var(--tx3);">${c.street}</span></td><td>${c.zip} ${c.city}</td><td><a href="mailto:${c.email}" style="color:var(--brand);">${c.email}</a></td><td>${c.phone}</td><td style="font-family:'DM Mono';font-size:11px;">${c.uid||'—'}</td><td><button class="btn btn-sm btn-secondary" onclick="openContactForm('${type}',DB.${type}.find(x=>x.id==='${c.id}'))">Edit</button></td></tr>`; }
+function filterContacts(input,type){ const q=input.value.toLowerCase(); const items=(type==='customers'?DB.customers:DB.suppliers).filter(c=>c.name.toLowerCase().includes(q)||c.city.toLowerCase().includes(q)); document.getElementById('contact-tbody').innerHTML=items.map(c=>contactRow(c,type)).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px;">Keine Treffer</td></tr>'; }
+
+function openContactForm(type, existing){
+  const isEdit=!!existing; const isCustomer=type==='customers';
+  const c=existing||{id:uid(),name:'',street:'',zip:'',city:'',country:'Österreich',email:'',phone:'',uid:''};
+  openModal(isEdit?`${isCustomer?'Kunde':'Lieferant'} bearbeiten`:`Neuer ${isCustomer?'Kunde':'Lieferant'}`,`
+    <div class="form-grid">
+      <div class="field form-full"><label>Name / Firma *</label><input id="cName" value="${c.name}"></div>
+      <div class="field form-full"><label>Straße</label><input id="cStreet" value="${c.street}"></div>
+      <div class="field"><label>PLZ</label><input id="cZip" value="${c.zip}"></div>
+      <div class="field"><label>Stadt</label><input id="cCity" value="${c.city}"></div>
+      <div class="field"><label>E-Mail</label><input type="email" id="cEmail" value="${c.email}"></div>
+      <div class="field"><label>Telefon</label><input id="cPhone" value="${c.phone}"></div>
+      <div class="field"><label>UID-Nummer</label><input id="cUid" value="${c.uid||''}"></div>
+      <div class="field"><label>Land</label><input id="cCountry" value="${c.country||'Österreich'}"></div>
+    </div>`,
+  [{label:isEdit?'Speichern':'Erstellen',cls:'btn-primary',fn:async()=>{
+    const name=document.getElementById('cName').value.trim();
+    if(!name){toast('Name erforderlich','err');return;}
+    const obj={id:c.id,name,street:g('cStreet'),zip:g('cZip'),city:g('cCity'),country:g('cCountry'),email:g('cEmail'),phone:g('cPhone'),uid:g('cUid')};
+    setSyncStatus('loading','Speichere...');
+    if(type==='customers'){if(isEdit)DB.customers=DB.customers.map(x=>x.id===c.id?obj:x);else DB.customers.push(obj);await saveCustomers();}
+    else{if(isEdit)DB.suppliers=DB.suppliers.map(x=>x.id===c.id?obj:x);else DB.suppliers.push(obj);await saveSuppliers();}
+    setSyncStatus('ok','Gespeichert');closeModal();toast('Gespeichert ✓','ok');
+    type==='customers'?renderCustomers():renderSuppliers();
+  }},
+  ...(isEdit?[{label:'Löschen',cls:'btn-danger',fn:async()=>{if(!confirm('Wirklich löschen?'))return;if(type==='customers'){DB.customers=DB.customers.filter(x=>x.id!==c.id);await saveCustomers();}else{DB.suppliers=DB.suppliers.filter(x=>x.id!==c.id);await saveSuppliers();}closeModal();toast('Gelöscht','ok');type==='customers'?renderCustomers():renderSuppliers();}}]:[])
+  ]);
+}
+function g(id){return document.getElementById(id)?.value||'';}
+
+// ═══════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════
+function renderProducts(){
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="openProductForm()">+ Produkt</button>`;
+  document.getElementById('pageContent').innerHTML = `
+    <div class="search-bar"><input class="search-input" placeholder="Produkte suchen..." oninput="filterProducts(this)"></div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Nr.</th><th>Name</th><th>Typ</th><th>Einheit</th><th>Preis Netto</th><th>MwSt</th><th></th></tr></thead>
+      <tbody id="prod-tbody">${DB.products.length?DB.products.map(productRow).join(''):'<tr><td colspan="7"><div class="empty"><div class="empty-ico">📦</div><p>Noch keine Produkte</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+function productRow(p){ return `<tr><td style="font-family:'DM Mono';font-size:11px;">${p.articleNumber||'—'}</td><td><strong>${p.name}</strong>${p.description?`<br><span style="font-size:11px;color:var(--tx3);">${p.description}</span>`:''}</td><td><span class="badge ${p.type==='service'?'badge-blue':'badge-gray'}">${p.type==='service'?'Leistung':'Produkt'}</span></td><td>${p.unit}</td><td style="font-family:'DM Mono';">${fmtMoneyPlain(p.priceNet)} €</td><td>${p.taxRate}%</td><td><button class="btn btn-sm btn-secondary" onclick="openProductForm(DB.products.find(x=>x.id==='${p.id}'))">Edit</button></td></tr>`; }
+function filterProducts(input){ const q=input.value.toLowerCase(); document.getElementById('prod-tbody').innerHTML=DB.products.filter(p=>p.name.toLowerCase().includes(q)||p.articleNumber?.toLowerCase().includes(q)).map(productRow).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:20px;">Keine Treffer</td></tr>'; }
+
+function openProductForm(existing){
+  const isEdit=!!existing; const p=existing||{id:uid(),articleNumber:'',type:'service',name:'',description:'',unit:'Pauschale',priceNet:0,taxRate:20};
+  openModal(isEdit?'Produkt bearbeiten':'Neues Produkt / Leistung',`
+    <div class="form-grid">
+      <div class="field"><label>Artikelnummer</label><input id="pArt" value="${p.articleNumber||''}"></div>
+      <div class="field"><label>Typ</label><select id="pType"><option value="service" ${p.type==='service'?'selected':''}>Leistung</option><option value="product" ${p.type==='product'?'selected':''}>Produkt</option></select></div>
+      <div class="field form-full"><label>Name *</label><input id="pName" value="${p.name}"></div>
+      <div class="field form-full"><label>Beschreibung</label><textarea id="pDesc">${p.description}</textarea></div>
+      <div class="field"><label>Einheit</label><select id="pUnit"><option ${p.unit==='Pauschale'?'selected':''}>Pauschale</option><option ${p.unit==='Stunden'?'selected':''}>Stunden</option><option ${p.unit==='Stk'?'selected':''}>Stk</option><option ${p.unit==='m²'?'selected':''}>m²</option><option ${p.unit==='m'?'selected':''}>m</option></select></div>
+      <div class="field"><label>Preis Netto (€)</label><input type="number" id="pPrice" value="${p.priceNet}"></div>
+      <div class="field"><label>MwSt %</label><select id="pTax"><option value="20" ${p.taxRate==20?'selected':''}>20%</option><option value="10" ${p.taxRate==10?'selected':''}>10%</option><option value="0" ${p.taxRate==0?'selected':''}>0%</option></select></div>
+    </div>`,
+  [{label:isEdit?'Speichern':'Erstellen',cls:'btn-primary',fn:async()=>{
+    const name=g('pName');if(!name){toast('Name erforderlich','err');return;}
+    const obj={id:p.id,articleNumber:g('pArt'),type:g('pType'),name,description:g('pDesc'),unit:g('pUnit'),priceNet:parseFloat(g('pPrice'))||0,taxRate:parseFloat(g('pTax'))||20};
+    setSyncStatus('loading','Speichere...');
+    if(isEdit)DB.products=DB.products.map(x=>x.id===p.id?obj:x);else DB.products.push(obj);
+    await saveProducts();setSyncStatus('ok','Gespeichert');closeModal();toast('Gespeichert ✓','ok');renderProducts();
+  }},
+  ...(isEdit?[{label:'Löschen',cls:'btn-danger',fn:async()=>{if(!confirm('Wirklich löschen?'))return;DB.products=DB.products.filter(x=>x.id!==p.id);await saveProducts();closeModal();toast('Gelöscht','ok');renderProducts();}}]:[])
+  ]);
+}
+
+// ═══════════════════════════════════════
+// EMPLOYEES
+// ═══════════════════════════════════════
+function renderEmployees(){
+  document.getElementById('topbarActions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="openEmployeeForm()">+ Mitarbeiter</button>`;
+  document.getElementById('pageContent').innerHTML=`
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Position</th><th>Stundensatz</th><th>E-Mail</th><th>Eingetreten</th><th></th></tr></thead>
+      <tbody>${DB.employees.length?DB.employees.map(e=>`<tr><td><strong>${e.firstName} ${e.lastName}</strong></td><td>${e.position}</td><td style="font-family:'DM Mono';">${fmtMoneyPlain(e.hourlyRate)} €/h</td><td>${e.email||'—'}</td><td>${fmtDate(e.entryDate)}</td><td><button class="btn btn-sm btn-secondary" onclick="openEmployeeForm(DB.employees.find(x=>x.id==='${e.id}'))">Edit</button></td></tr>`).join(''):'<tr><td colspan="6"><div class="empty"><div class="empty-ico">👤</div><p>Noch keine Mitarbeiter</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+
+function openEmployeeForm(existing){
+  const isEdit=!!existing; const e=existing||{id:uid(),firstName:'',lastName:'',position:'',hourlyRate:0,email:'',phone:'',entryDate:today(),targetWeeklyHours:38.5,vacationDaysPerYear:25};
+  openModal(isEdit?'Mitarbeiter bearbeiten':'Neuer Mitarbeiter',`
+    <div class="form-grid">
+      <div class="field"><label>Vorname *</label><input id="eFirst" value="${e.firstName}"></div>
+      <div class="field"><label>Nachname *</label><input id="eLast" value="${e.lastName}"></div>
+      <div class="field"><label>Position</label><input id="ePos" value="${e.position}"></div>
+      <div class="field"><label>Stundensatz (€)</label><input type="number" id="eRate" value="${e.hourlyRate}"></div>
+      <div class="field"><label>E-Mail</label><input type="email" id="eEmail" value="${e.email||''}"></div>
+      <div class="field"><label>Telefon</label><input id="ePhone" value="${e.phone||''}"></div>
+      <div class="field"><label>Eintrittsdatum</label><input type="date" id="eEntry" value="${e.entryDate||''}"></div>
+      <div class="field"><label>Soll-Stunden/Woche</label><input type="number" id="eHours" value="${e.targetWeeklyHours||38.5}"></div>
+      <div class="field"><label>Urlaubstage/Jahr</label><input type="number" id="eVac" value="${e.vacationDaysPerYear||25}"></div>
+    </div>`,
+  [{label:isEdit?'Speichern':'Erstellen',cls:'btn-primary',fn:async()=>{
+    const fn=g('eFirst'),ln=g('eLast');if(!fn||!ln){toast('Name erforderlich','err');return;}
+    const obj={id:e.id,firstName:fn,lastName:ln,position:g('ePos'),hourlyRate:parseFloat(g('eRate'))||0,email:g('eEmail'),phone:g('ePhone'),entryDate:g('eEntry'),targetWeeklyHours:parseFloat(g('eHours'))||38.5,vacationDaysPerYear:parseFloat(g('eVac'))||25};
+    setSyncStatus('loading','Speichere...');
+    if(isEdit)DB.employees=DB.employees.map(x=>x.id===e.id?obj:x);else DB.employees.push(obj);
+    await saveEmployees();setSyncStatus('ok','Gespeichert');closeModal();toast('Gespeichert ✓','ok');renderEmployees();
+  }},
+  ...(isEdit?[{label:'Löschen',cls:'btn-danger',fn:async()=>{if(!confirm('Wirklich löschen?'))return;DB.employees=DB.employees.filter(x=>x.id!==e.id);await saveEmployees();closeModal();toast('Gelöscht','ok');renderEmployees();}}]:[])
+  ]);
+}
+
+// ═══════════════════════════════════════
+// TIME TRACKING
+// ═══════════════════════════════════════
+function renderTime(){
+  document.getElementById('topbarActions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="openTimeForm()">+ Eintrag</button>`;
+  const empOpts=DB.employees.map(e=>`<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
+  const recent=[...DB.timeEntries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,50);
+  document.getElementById('pageContent').innerHTML=`
+    <div class="card" style="margin-bottom:14px;"><div class="card-body">
+      <div class="form-grid cols-3" style="gap:8px;">
+        <div class="field"><label>Mitarbeiter</label><select id="timeEmpFilter" onchange="renderTimeTable()">${empOpts}</select></div>
+        <div class="field"><label>Monat</label><input type="month" id="timeMonthFilter" value="${today().slice(0,7)}" onchange="renderTimeTable()"></div>
+      </div>
+    </div></div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Datum</th><th>Mitarbeiter</th><th>Typ</th><th>Stunden</th><th>Beschreibung</th><th></th></tr></thead>
+      <tbody id="time-tbody">${recent.map(timeRow).join('')||'<tr><td colspan="6"><div class="empty"><div class="empty-ico">⏱</div><p>Noch keine Einträge</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+function timeRow(t){ return `<tr><td>${fmtDate(t.date)}</td><td>${getEmployeeName(t.employeeId)}</td><td><span class="badge ${t.type==='work'?'badge-blue':t.type==='vacation'?'badge-green':'badge-red'}">${t.type==='work'?'Arbeit':t.type==='vacation'?'Urlaub':'Krank'}</span></td><td style="font-family:'DM Mono';">${t.hours}h</td><td style="color:var(--tx3);">${t.description||'—'}</td><td><button class="btn btn-sm btn-secondary" onclick="deleteTime('${t.id}')">✕</button></td></tr>`; }
+function renderTimeTable(){ const emp=document.getElementById('timeEmpFilter')?.value; const month=document.getElementById('timeMonthFilter')?.value; const filtered=DB.timeEntries.filter(t=>(!emp||t.employeeId===emp)&&(!month||t.date.startsWith(month))).sort((a,b)=>b.date.localeCompare(a.date)); document.getElementById('time-tbody').innerHTML=filtered.map(timeRow).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px;">Keine Einträge</td></tr>'; }
+
+function openTimeForm(){
+  if(!DB.employees.length){toast('Bitte zuerst Mitarbeiter anlegen','err');return;}
+  const empOpts=DB.employees.map(e=>`<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
+  const custOpts=DB.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  openModal('Zeiteintrag erfassen',`
+    <div class="form-grid">
+      <div class="field"><label>Mitarbeiter *</label><select id="tEmp">${empOpts}</select></div>
+      <div class="field"><label>Datum *</label><input type="date" id="tDate" value="${today()}"></div>
+      <div class="field"><label>Typ</label><select id="tType"><option value="work">Arbeit</option><option value="vacation">Urlaub</option><option value="sick">Krank</option></select></div>
+      <div class="field"><label>Stunden</label><input type="number" id="tHours" value="8" step="0.5"></div>
+      <div class="field"><label>Kunde / Projekt</label><select id="tCust"><option value="">— Kein —</option>${custOpts}</select></div>
+      <div class="field form-full"><label>Beschreibung</label><input id="tDesc" placeholder="Optional"></div>
+    </div>`,
+  [{label:'Speichern',cls:'btn-primary',fn:async()=>{
+    const emp=g('tEmp'),date=g('tDate');if(!emp||!date){toast('Pflichtfelder ausfüllen','err');return;}
+    const obj={id:uid(),employeeId:emp,date,hours:parseFloat(g('tHours'))||8,type:g('tType'),description:g('tDesc'),customerId:g('tCust')};
+    DB.timeEntries.push(obj);setSyncStatus('loading','Speichere...');
+    await saveTimeEntries();setSyncStatus('ok','Gespeichert');closeModal();toast('Gespeichert ✓','ok');renderTime();
+  }}]);
+}
+async function deleteTime(id){ if(!confirm('Löschen?'))return; DB.timeEntries=DB.timeEntries.filter(t=>t.id!==id); await saveTimeEntries(); toast('Gelöscht','ok'); renderTime(); }
+
+// ═══════════════════════════════════════
+// FINANCES
+// ═══════════════════════════════════════
+function renderFinances(){
+  document.getElementById('topbarActions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="openTransactionForm()">+ Buchung</button>`;
+  const month = today().slice(0,7);
+  const thisMonthTx = DB.transactions.filter(t=>t.date.startsWith(month));
+  const income = thisMonthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = thisMonthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Math.abs(t.amount),0);
+  const sorted = [...DB.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,100);
+  document.getElementById('pageContent').innerHTML=`
+    <div class="stats-grid" style="margin-bottom:16px;">
+      <div class="stat-card"><div class="stat-label">Einnahmen (Monat)</div><div class="stat-value" style="color:var(--green);">${fmtMoneyPlain(income)} €</div></div>
+      <div class="stat-card"><div class="stat-label">Ausgaben (Monat)</div><div class="stat-value" style="color:var(--red);">${fmtMoneyPlain(expense)} €</div></div>
+      <div class="stat-card"><div class="stat-label">Saldo (Monat)</div><div class="stat-value" style="${income-expense>=0?'color:var(--green)':'color:var(--red)'}">${fmtMoneyPlain(income-expense)} €</div></div>
+    </div>
+    <div class="card"><div class="card-header"><span class="card-title">Buchungen</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Datum</th><th>Beschreibung</th><th>Kategorie</th><th>MwSt</th><th>Betrag</th><th></th></tr></thead>
+      <tbody>${sorted.length?sorted.map(txRow).join(''):'<tr><td colspan="6"><div class="empty"><div class="empty-ico">💳</div><p>Noch keine Buchungen</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+function txRow(t){ return `<tr><td>${fmtDate(t.date)}</td><td>${t.description}</td><td style="color:var(--tx3);">${t.category}</td><td style="font-family:'DM Mono';font-size:11px;">${t.taxRate||0}%</td><td style="font-family:'DM Mono';font-weight:600;color:${t.type==='income'?'var(--green)':'var(--red)'};">${t.type==='income'?'+':'−'}${fmtMoneyPlain(Math.abs(t.amount))} €</td><td><button class="btn btn-sm btn-secondary" onclick="deleteTransaction('${t.id}')">✕</button></td></tr>`; }
+
+const TX_CATEGORIES_IN = ['Umsätze Reinigung','Umsätze Sonstige','Anzahlungen','Sonstige Einnahmen'];
+const TX_CATEGORIES_OUT = ['Personal','Material & Reinigungsmittel','Fahrzeug','Versicherungen','Miete & Büro','Telefon & Internet','Werkzeug & Geräte','Marketing','Steuerberater','Sonstiges'];
+
+function openTransactionForm(){
+  openModal('Buchung erfassen',`
+    <div class="fin-type-toggle" style="margin-bottom:14px;">
+      <button class="fin-type-btn active" id="btnIn" onclick="setTxType('income')">Einnahme</button>
+      <button class="fin-type-btn" id="btnOut" onclick="setTxType('expense')">Ausgabe</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Datum *</label><input type="date" id="txDate" value="${today()}"></div>
+      <div class="field"><label>Betrag (€) *</label><input type="number" id="txAmount" placeholder="0,00"></div>
+      <div class="field"><label>Kategorie</label><select id="txCat">${TX_CATEGORIES_IN.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>MwSt %</label><select id="txTax"><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option></select></div>
+      <div class="field form-full"><label>Beschreibung *</label><input id="txDesc" placeholder="z.B. Rechnung RE-2026-011"></div>
+    </div>`,
+  [{label:'Speichern',cls:'btn-primary',fn:async()=>{
+    const date=g('txDate'),amount=parseFloat(g('txAmount')),desc=g('txDesc');
+    if(!date||!amount||!desc){toast('Pflichtfelder ausfüllen','err');return;}
+    const type=document.getElementById('btnIn').classList.contains('active')?'income':'expense';
+    const obj={id:uid(),date,amount:type==='income'?amount:-Math.abs(amount),category:g('txCat'),description:desc,type,taxRate:parseFloat(g('txTax'))||0};
+    DB.transactions.push(obj);setSyncStatus('loading','Speichere...');
+    await saveTransactions();setSyncStatus('ok','Gespeichert');closeModal();toast('Gespeichert ✓','ok');renderFinances();
+  }}]);
+  window._txType='income';
+}
+function setTxType(type){
+  window._txType=type;
+  document.getElementById('btnIn').classList.toggle('active',type==='income');
+  document.getElementById('btnOut').classList.toggle('active',type==='expense');
+  const cats=type==='income'?TX_CATEGORIES_IN:TX_CATEGORIES_OUT;
+  document.getElementById('txCat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
+}
+async function deleteTransaction(id){ if(!confirm('Löschen?'))return; DB.transactions=DB.transactions.filter(t=>t.id!==id); await saveTransactions(); toast('Gelöscht','ok'); renderFinances(); }
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+function renderSettings(){
+  document.getElementById('topbarActions').innerHTML='';
+  const s=DB.settings;
+  document.getElementById('pageContent').innerHTML=`
+    <div class="card">
+      <div class="card-header"><span class="card-title">Firmendaten</span><button class="btn btn-primary btn-sm" onclick="saveSettingsForm()">Speichern</button></div>
+      <div class="card-body">
+        <div class="settings-section">
+          <h3>Allgemein</h3>
+          <div class="form-grid">
+            <div class="field form-full"><label>Firmenname</label><input id="sName" value="${s.name}"></div>
+            <div class="field form-full"><label>Straße</label><input id="sStreet" value="${s.street}"></div>
+            <div class="field"><label>PLZ</label><input id="sZip" value="${s.zip}"></div>
+            <div class="field"><label>Stadt</label><input id="sCity" value="${s.city}"></div>
+            <div class="field"><label>Telefon</label><input id="sTel" value="${s.tel||''}"></div>
+            <div class="field"><label>E-Mail</label><input id="sEmail" value="${s.email||''}"></div>
+            <div class="field"><label>Website</label><input id="sWeb" value="${s.web||''}"></div>
+            <div class="field"><label>UID-Nummer</label><input id="sUid" value="${s.uid}"></div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>Bankverbindung</h3>
+          <div class="form-grid">
+            <div class="field form-full"><label>Bank</label><input id="sBank" value="${s.bank}"></div>
+            <div class="field"><label>IBAN</label><input id="sIban" value="${s.iban}"></div>
+            <div class="field"><label>BIC</label><input id="sBic" value="${s.bic}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <div class="card-header"><span class="card-title">Google Sheets</span></div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--tx2);margin-bottom:10px;">Deine Daten werden in diesem Google Sheet gespeichert:</p>
+        ${sheetId?`<a href="https://docs.google.com/spreadsheets/d/${sheetId}" target="_blank" class="btn btn-secondary">📊 Google Sheet öffnen</a>`:'<span style="color:var(--tx3);">Nicht verbunden</span>'}
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="loadAllData().then(()=>{toast('Daten neu geladen ✓','ok');showPage(currentPage);})">🔄 Daten neu laden</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--tx3);">Client ID: ${localStorage.getItem('gClientId')||'—'}</div>
+      </div>
+    </div>`;
+}
+
+async function saveSettingsForm(){
+  DB.settings={...DB.settings,name:g('sName'),street:g('sStreet'),zip:g('sZip'),city:g('sCity'),tel:g('sTel'),email:g('sEmail'),web:g('sWeb'),uid:g('sUid'),bank:g('sBank'),iban:g('sIban'),bic:g('sBic')};
+  setSyncStatus('loading','Speichere...');
+  await saveSettings();setSyncStatus('ok','Gespeichert');toast('Einstellungen gespeichert ✓','ok');
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.onload = () => {
+  loadLocalCache();
+  const clientId = localStorage.getItem('gClientId');
+  if(clientId){
+    initGoogleAuth();
+  } else {
+    showSetup();
+    // Show instructions on setup screen
+    document.querySelector('.setup-card').innerHTML += `
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="showClientIdDialog()">
+          ⚙ Google Client ID einrichten
+        </button>
+      </div>`;
+  }
+};
+</script>
+</body>
+</html>

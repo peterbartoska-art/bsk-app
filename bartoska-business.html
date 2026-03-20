@@ -1363,6 +1363,14 @@ function renderSettings(){
       </div>
     </div>
     <div class="card" style="margin-top:14px;">
+      <div class="card-header"><span class="card-title">Daten importieren</span></div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--tx2);margin-bottom:12px;line-height:1.6;">Importiere dein Backup aus der alten Bartoska Business App (JSON-Datei). Alle bestehenden Daten werden überschrieben.</p>
+        <button class="btn btn-primary" onclick="importBackup()">📂 JSON Backup importieren</button>
+        <p style="font-size:12px;color:var(--tx3);margin-top:8px;">Unterstützt: bartoska_backup_*.json</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
       <div class="card-header"><span class="card-title">Google Sheets</span></div>
       <div class="card-body">
         <p style="font-size:13px;color:var(--tx2);margin-bottom:10px;">Deine Daten werden in diesem Google Sheet gespeichert:</p>
@@ -1373,6 +1381,67 @@ function renderSettings(){
         <div style="margin-top:8px;font-size:12px;color:var(--tx3);">Client ID: ${localStorage.getItem('gClientId')||'—'}</div>
       </div>
     </div>`;
+}
+
+function importBackup(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const text = await file.text();
+    try {
+      const data = JSON.parse(text);
+      // Support both old format (with companySettings) and new format (with settings)
+      if(data.companySettings && !data.settings) {
+        // Old format - convert
+        const s = data.companySettings || {};
+        const addr = s.address || {};
+        data.settings = {
+          name: s.name||'', street: addr.street||'', zip: addr.zip||'',
+          city: addr.city||'', country: addr.country||'Österreich',
+          iban: s.iban||'', bic: s.bic||'', bank: s.bankName||'',
+          uid: s.uid||'', tel: s.tel||'', email: s.email||'',
+          web: s.web||'bartoska.at', logoUrl: s.logoUrl||''
+        };
+        // Convert customers addresses
+        if(data.customers) data.customers = data.customers.map(c => {
+          const a = c.address||{};
+          return {...c, street:a.street||c.street||'', zip:a.zip||c.zip||'', city:a.city||c.city||'', country:a.country||'Österreich'};
+        });
+      }
+      if(data.customers) DB.customers = data.customers;
+      if(data.suppliers) DB.suppliers = data.suppliers;
+      if(data.products) DB.products = data.products;
+      if(data.invoices) DB.invoices = data.invoices;
+      if(data.offers) DB.offers = data.offers || [];
+      if(data.employees) DB.employees = data.employees;
+      if(data.timeEntries) DB.timeEntries = data.timeEntries;
+      if(data.transactions) DB.transactions = data.transactions;
+      if(data.settings) DB.settings = {...DB.settings, ...data.settings};
+      saveLocalCache();
+      setSyncStatus('loading','Speichere in Google Sheets...');
+      toast('Daten geladen — speichere in Google Sheets...','ok');
+      // Save all to Google Sheets
+      await saveCustomers();
+      await saveSuppliers();
+      await saveProducts();
+      await saveInvoices();
+      await saveOffers();
+      await saveEmployees();
+      await saveTimeEntries();
+      await saveTransactions();
+      await saveSettings();
+      setSyncStatus('ok','Verbunden');
+      toast('Import erfolgreich! ' + DB.customers.length + ' Kunden, ' + DB.invoices.length + ' Rechnungen ✓','ok');
+      renderSettings();
+    } catch(e) {
+      toast('Fehler beim Import: ' + e.message,'err');
+      console.error(e);
+    }
+  };
+  input.click();
 }
 
 async function saveSettingsForm(){

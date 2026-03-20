@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BSK Bartoska">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<title>BSK Apps — Bartoska Gebäudereinigung</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --sb:env(safe-area-inset-bottom,0px);
+  --st:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;background:#111;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:#fff;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER */
+.header{
+  padding:calc(24px + var(--st)) 24px 20px;
+  text-align:center;
+  flex-shrink:0;
+}
+.logo{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,#3B6D11,#639922);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:36px;margin-bottom:16px;
+}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-0.3px;color:#fff;}
+.header p{font-size:14px;color:rgba(255,255,255,0.5);margin-top:4px;}
+
+/* MAIN */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:16px 20px calc(24px + var(--sb));
+  gap:16px;
+  max-width:480px;
+  margin:0 auto;
+  width:100%;
+}
+
+/* APP CARDS */
+.app-card{
+  border-radius:20px;
+  padding:24px 22px;
+  cursor:pointer;
+  text-decoration:none;
+  display:block;
+  position:relative;
+  overflow:hidden;
+  transition:transform .15s,opacity .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.app-card:active{transform:scale(0.97);opacity:0.9;}
+
+.card-pruef{background:linear-gradient(135deg,#2A5209 0%,#3B6D11 50%,#4a8a14 100%);}
+.card-wartung{background:linear-gradient(135deg,#5A3000 0%,#7C4A00 50%,#9a5e00 100%);}
+
+.card-icon{font-size:42px;margin-bottom:14px;display:block;}
+.card-title{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.3px;margin-bottom:6px;}
+.card-desc{font-size:14px;color:rgba(255,255,255,0.75);line-height:1.5;}
+.card-badge{
+  display:inline-block;margin-top:14px;
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.25);
+  color:#fff;font-size:12px;font-weight:600;
+  padding:5px 12px;border-radius:20px;
+  letter-spacing:0.02em;
+}
+.card-arrow{
+  position:absolute;right:22px;top:50%;transform:translateY(-50%);
+  font-size:24px;color:rgba(255,255,255,0.4);
+}
+
+/* POINTS LIST */
+.points{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+.point{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.8);}
+.point::before{content:'';width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.5);flex-shrink:0;}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  padding:0 20px calc(16px + var(--sb));
+  font-size:12px;color:rgba(255,255,255,0.25);
+  line-height:1.6;
+}
+.footer a{color:rgba(255,255,255,0.4);text-decoration:none;}
+
+/* DIVIDER */
+.divider{
+  display:flex;align-items:center;gap:12px;
+  font-size:11px;color:rgba(255,255,255,0.25);
+  text-transform:uppercase;letter-spacing:0.08em;
+}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.1);}
+
+/* INSTALL HINT */
+.install-hint{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:14px 16px;
+  font-size:13px;
+  color:rgba(255,255,255,0.6);
+  line-height:1.6;
+  text-align:center;
+}
+.install-hint strong{color:rgba(255,255,255,0.85);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🔥</div>
+  <h1>Bartoska BSK Apps</h1>
+  <p>Brandschutzklappe · Prüfung & Wartung</p>
+</div>
+
+<div class="main">
+
+  <!-- VOLLPROTOKOLL -->
+  <a class="app-card card-pruef" href="BSK-Pruefprotokoll-Pro.html">
+    <span class="card-icon">📋</span>
+    <div class="card-title">Vollprüfprotokoll</div>
+    <div class="card-desc">Erstprüfung und vollständige Abnahme nach ÖNORM EN 1366-2 / VDI 6022</div>
+    <div class="points">
+      <div class="point">Dokumentation & Kennzeichnung</div>
+      <div class="point">Einbausituation & Mechanik</div>
+      <div class="point">Auslösung, Funktion & Elektrik</div>
+      <div class="point">Brandabschnitt & Baurecht</div>
+    </div>
+    <span class="card-badge">41 Prüfpunkte · 8 Bereiche</span>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <div class="divider">oder</div>
+
+  <!-- JAHRESWARTUNG -->
+  <a class="app-card card-wartung" href="BSK-Jahreswartung.html">
+    <span class="card-icon">🔧</span>
+    <div class="card-title">Jahreswartung</div>
+    <div class="card-desc">Jährliche Kontrolle für Bestandskunden — schlank und schnell</div>
+    <div class="points">
+      <div class="point">Einbausituation</div>
+      <div class="point">Mechanische Prüfung</div>
+      <div class="point">Auslöseeinrichtung</div>
+      <div class="point">Funktionsprüfung</div>
+    </div>
+    <span class="card-badge">26 Prüfpunkte · 4 Bereiche</span>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <div class="install-hint">
+    <strong>💡 Als App speichern:</strong><br>
+    Chrome: Menü (⋮) → „Zum Startbildschirm"<br>
+    Safari: Teilen (□↑) → „Zum Home-Bildschirm"
+  </div>
+
+</div>
+
+<div class="footer">
+  Bartoska Gebäudereinigung · Vasoldsberg<br>
+  <a href="https://bartoska.at">bartoska.at</a> · VDI 6022 zertifiziert
+</div>
+
+</body>
+</html>

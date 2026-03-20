@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BSK Wartung">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7C4A00">
+<title>BSK Prüfprotokoll — Bartoska</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --g:#7C4A00;--gd:#5A3400;--gl:#FDF0DC;--gm:#B06800;
+  --r:#A32D2D;--rl:#FCEBEB;
+  --b:#185FA5;--bl:#E6F1FB;
+  --am:#854F0B;--aml:#FAEEDA;
+  --bg:#fff;--bg2:#F6F5F2;--bg3:#EDECE8;
+  --tx:#1a1a1a;--tx2:#555550;--tx3:#888880;
+  --br:rgba(0,0,0,0.11);--br2:rgba(0,0,0,0.20);
+  --rad:10px;--rads:7px;
+  --sb:env(safe-area-inset-bottom,0px);
+  --st:env(safe-area-inset-top,0px);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1C1C1E;--bg2:#2C2C2E;--bg3:#3A3A3C;
+  --tx:#F2F2F7;--tx2:#AEAEB2;--tx3:#6C6C70;
+  --br:rgba(255,255,255,0.10);--br2:rgba(255,255,255,0.20);
+  --gl:#2A1800;--rl:#2C1010;--bl:#0A1F35;--aml:#2A1A05;
+  --g:#D4900A;--gd:#E8A820;--gm:#D4900A;
+}}
+html,body{height:100%;overflow:hidden;background:var(--bg2);}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--tx);font-size:15px;}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:540px;margin:0 auto;background:var(--bg);}
+.hdr{background:var(--g);color:#fff;padding:calc(13px + var(--st)) 14px 11px;flex-shrink:0;display:flex;align-items:center;gap:10px;}
+.hdr-back{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:7px;padding:6px 10px;font-size:13px;cursor:pointer;flex-shrink:0;}
+.hdr-info{flex:1;min-width:0;}
+.hdr-info h1{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-info p{font-size:11px;opacity:0.8;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-add{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:7px;padding:6px 10px;font-size:20px;cursor:pointer;flex-shrink:0;line-height:1;}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.list-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--br);background:var(--bg);cursor:pointer;transition:background .12s;}
+.list-item:active{background:var(--bg2);}
+.item-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ic-k{background:#E6F1FB;}.ic-w{background:#EAF3DE;}.ic-kl{background:#FAEEDA;}
+.ic-kl.nok{background:#FCEBEB;}.ic-kl.ok{background:#EAF3DE;}
+.item-body{flex:1;min-width:0;}
+.item-title{font-size:15px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-sub{font-size:12px;color:var(--tx3);margin-top:2px;}
+.item-arrow{color:var(--tx3);font-size:18px;flex-shrink:0;}
+.ibadge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;flex-shrink:0;}
+.b-ok{background:var(--gl);color:var(--g);}.b-nok{background:var(--rl);color:var(--r);}
+.b-part{background:var(--aml);color:var(--am);}.b-open{background:var(--bg3);color:var(--tx3);}
+.empty{text-align:center;padding:60px 24px;color:var(--tx3);}
+.empty .eico{font-size:48px;margin-bottom:12px;}
+.empty p{font-size:14px;line-height:1.6;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--bg);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + var(--sb));width:100%;max-width:540px;max-height:90dvh;overflow-y:auto;}
+.modal h2{font-size:17px;font-weight:600;margin-bottom:16px;}
+.modal-close{float:right;background:none;border:none;font-size:22px;color:var(--tx3);cursor:pointer;margin-top:-2px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.field label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;}
+.field input,.field select,.field textarea{font-size:14px;font-family:inherit;padding:10px 11px;background:var(--bg2);border:1px solid var(--br2);border-radius:var(--rads);color:var(--tx);outline:none;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gm);}
+.field textarea{resize:none;height:68px;line-height:1.5;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-save{width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:var(--rad);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px;}
+.btn-save:active{background:var(--gd);}
+.btn-del{width:100%;padding:11px;background:var(--rl);color:var(--r);border:1px solid var(--r);border-radius:var(--rad);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:8px;}
+.tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--br);flex-shrink:0;}
+.tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;font-weight:500;color:var(--tx3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;}
+.tab.active{color:var(--g);border-bottom-color:var(--g);}
+.sbar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--br);flex-shrink:0;flex-wrap:wrap;}
+.stat{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--tx2);}
+.dot{width:7px;height:7px;border-radius:50%;}
+.dok{background:var(--gm);}.dnok{background:#E24B4A;}.dna{background:#378ADD;}.dopen{background:var(--tx3);}
+.pbar{flex:1;min-width:40px;height:4px;background:var(--bg3);border-radius:2px;}
+.pfill{height:100%;background:var(--gm);border-radius:2px;transition:width .3s;}
+.sec-hdr{padding:7px 14px 5px;background:var(--bg2);border-top:1px solid var(--br);border-bottom:1px solid var(--br);}
+.sec-hdr h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);}
+.ci{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--br);background:var(--bg);}
+.ci-text{flex:1;min-width:0;}
+.ci-main{font-size:13px;color:var(--tx);line-height:1.3;}
+.ci-sub{font-size:11px;color:var(--tx3);margin-top:2px;}
+.tri{display:flex;gap:3px;flex-shrink:0;}
+.tri button{width:32px;height:32px;border-radius:6px;border:1px solid var(--br2);background:var(--bg2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--tx2);}
+.tri .bok.on{background:var(--gl);border-color:var(--gm);color:var(--g);}
+.tri .bnok.on{background:var(--rl);border-color:#E24B4A;color:var(--r);}
+.tri .bna.on{background:var(--bl);border-color:#378ADD;color:var(--b);}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--bg3);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.photo-add{aspect-ratio:1;border-radius:8px;border:2px dashed var(--br2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--bg2);color:var(--tx3);font-size:11px;gap:4px;}
+.photo-add .pico{font-size:26px;}
+input[type=file]{display:none;}
+.bbar{background:var(--bg);border-top:1px solid var(--br);padding:10px 14px calc(10px + var(--sb));display:flex;gap:8px;flex-shrink:0;}
+.bsec{flex:1;padding:12px 8px;background:var(--bg2);border:1px solid var(--br2);border-radius:var(--rad);font-size:14px;font-family:inherit;color:var(--tx);cursor:pointer;font-weight:500;}
+.bmain{flex:2.5;padding:12px 8px;background:var(--g);border:none;border-radius:var(--rad);font-size:14px;font-family:inherit;color:#fff;cursor:pointer;font-weight:600;}
+.bmain:active{background:var(--gd);}
+.proto-view{padding:14px 14px calc(120px + var(--sb));}
+.proto-hero{text-align:center;padding:16px 0 12px;}
+.proto-hero h2{font-size:20px;font-weight:700;}
+.pbadge{display:inline-block;padding:5px 18px;border-radius:20px;font-size:13px;font-weight:600;margin-top:6px;}
+.pcard{background:var(--bg2);border-radius:var(--rad);padding:11px 13px;margin-bottom:10px;border:1px solid var(--br);}
+.prow{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:3px 0;}
+.plbl{color:var(--tx2);}
+.ri-ok{color:var(--g);font-weight:600;}.ri-nok{color:var(--r);font-weight:600;}.ri-na{color:var(--b);font-weight:600;}.ri-open{color:var(--tx3);font-weight:600;}
+.proto-sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:6px;}
+.ract{width:100%;padding:13px;border-radius:var(--rad);font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;margin-bottom:8px;border:1px solid var(--br2);background:var(--bg2);color:var(--tx);}
+.ract.primary{background:var(--g);border-color:transparent;color:#fff;}
+.ract.primary:active{background:var(--gd);}
+.proto-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+.proto-photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;}
+.toast{position:fixed;bottom:calc(90px + var(--sb));left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="s1" class="screen active">
+  <div class="hdr">
+    <div class="hdr-info"><h1>🔧 BSK Jahreswartung</h1><p>Bartoska Gebäudereinigung · Jährliche Kontrolle</p></div>
+    <button class="hdr-add" onclick="openNewKunde()">＋</button>
+  </div>
+  <div class="scroll" id="kundenList"></div>
+</div>
+
+<div id="s2" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack(1)">‹ Zurück</button>
+    <div class="hdr-info"><h1 id="s2title">Objekte</h1><p id="s2sub">Wohnungen / Räume</p></div>
+    <button class="hdr-add" onclick="openNewWohnung()">＋</button>
+  </div>
+  <div class="scroll" id="wohnList"></div>
+</div>
+
+<div id="s3" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack(2)">‹ Zurück</button>
+    <div class="hdr-info"><h1 id="s3title">Klappen</h1><p id="s3sub"></p></div>
+    <button class="hdr-add" onclick="openEditWohnung()" style="font-size:15px;padding:6px 10px;">✎</button>
+    <button class="hdr-add" onclick="openNewKlappe()">＋</button>
+  </div>
+  <div class="scroll" id="klapList"></div>
+</div>
+
+<div id="s4" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="saveKlappeDaten();goBack(3)">‹ Zurück</button>
+    <div class="hdr-info"><h1 id="s4title">Prüfung</h1><p id="s4sub"></p></div>
+    <button class="hdr-add" onclick="openKlappeEditModal()" style="font-size:15px;padding:6px 10px;">✎</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pruef')">✔ Prüfung</button>
+    <button class="tab" onclick="switchTab('fotos')">📷 Fotos</button>
+    <button class="tab" onclick="switchTab('notizen')">📝 Notizen</button>
+  </div>
+  <div id="tabPruef" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="sbar">
+      <div class="stat"><div class="dot dok"></div><span id="cOk">0</span> i.O.</div>
+      <div class="stat"><div class="dot dnok"></div><span id="cNok">0</span> n.i.O.</div>
+      <div class="stat"><div class="dot dna"></div><span id="cNa">0</span> n.z.</div>
+      <div class="stat"><div class="dot dopen"></div><span id="cOpen">0</span> offen</div>
+      <div class="pbar"><div class="pfill" id="pFill" style="width:0%"></div></div>
+    </div>
+    <div class="scroll" id="checkBody"></div>
+  </div>
+  <div id="tabFotos" style="display:none;flex:1;overflow-y:auto;">
+    <div class="photo-grid" id="photoGrid"></div>
+    <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(event)">
+  </div>
+  <div id="tabNotizen" style="display:none;flex:1;overflow-y:auto;padding:14px;">
+    <div class="field"><label>Mängelbeschreibung</label><textarea id="fMaengel" placeholder="Mängel, Besonderheiten ..."></textarea></div>
+    <div class="field"><label>Empfohlene Maßnahmen</label><textarea id="fMassnahmen" placeholder="z.B. Schmelzlot tauschen bis ..."></textarea></div>
+    <div class="field"><label>Schließzeit (gemessen)</label><input type="text" id="fSchliesszeit" placeholder="z.B. 4,2 s"></div>
+  </div>
+  <div class="bbar">
+    <button class="bsec" onclick="saveKlappeDaten();openProtokoll()">Protokoll</button>
+    <button class="bmain" onclick="saveKlappeDaten();goBack(3)">Speichern ✓</button>
+  </div>
+</div>
+
+<div id="s5" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack(2)">‹ Zurück</button>
+    <div class="hdr-info"><h1>Jahresprotokoll</h1><p id="s5sub"></p></div>
+  </div>
+  <div class="scroll"><div class="proto-view" id="protoContent"></div></div>
+  <div class="bbar">
+    <button class="bsec" onclick="shareAll()">Teilen ↗</button>
+    <button class="bmain" onclick="printAll()">Drucken / PDF 🖨</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay hidden" id="mkunde">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('mkunde')">✕</button>
+    <h2 id="mKTitle">Kunde hinzufügen</h2>
+    <div class="field"><label>Kundenname / Firma</label><input type="text" id="mKName" placeholder="z.B. Mustermann Immobilien GmbH"></div>
+    <div class="field"><label>Adresse des Objekts</label><input type="text" id="mKAdresse" placeholder="z.B. Musterstraße 5, 8010 Graz"></div>
+    <div class="field"><label>Ansprechpartner</label><input type="text" id="mKKontakt" placeholder="Name, Tel oder E-Mail"></div>
+    <div class="field-row">
+      <div class="field"><label>Prüfdatum</label><input type="date" id="mKDatum"></div>
+      <div class="field"><label>Prüfer</label><input type="text" id="mKPruefer" placeholder="Techniker"></div>
+    </div>
+    <div class="field"><label>Nächste Prüfung fällig</label><input type="date" id="mKNaechste"></div>
+    <button class="btn-save" onclick="saveKunde()">Speichern</button>
+    <button class="btn-del" id="mKDelBtn" onclick="deleteKunde()" style="display:none">Kunde löschen</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="mwohnung">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('mwohnung')">✕</button>
+    <h2 id="mWTitle">Wohnung / Raum</h2>
+    <div class="field"><label>Bezeichnung</label><input type="text" id="mWName" placeholder="z.B. Wohnung Top 3, EG Technikraum"></div>
+    <div class="field"><label>Lage / Stockwerk</label><input type="text" id="mWLage" placeholder="z.B. 2. OG, Erdgeschoss"></div>
+    <div class="field"><label>Nutzung</label>
+      <select id="mWNutzung"><option value="">— auswählen —</option><option>Wohnung</option><option>Büro</option><option>Technikraum</option><option>Keller</option><option>Stiegenhaus</option><option>Lager</option><option>Gastronomie</option><option>Sonstiges</option></select>
+    </div>
+    <div class="field"><label>Bemerkung</label><input type="text" id="mWBem" placeholder="Optional"></div>
+    <button class="btn-save" onclick="saveWohnung()">Speichern</button>
+    <button class="btn-del" id="mWDelBtn" onclick="deleteWohnung()" style="display:none">Raum löschen</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="mklappe">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('mklappe')">✕</button>
+    <h2 id="mKlTitle">Klappe hinzufügen</h2>
+    <div class="field-row">
+      <div class="field"><label>Klappe Nr. / ID</label><input type="text" id="mKlNr" placeholder="z.B. BSK-01"></div>
+      <div class="field"><label>Nennmaß (B×H)</label><input type="text" id="mKlNennmass" placeholder="200×200 mm"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Feuerwiderstandskl.</label>
+        <select id="mKlFwk"><option value="">—</option><option>EI 30</option><option>EI 60</option><option>EI 90</option><option>EI 120</option></select>
+      </div>
+      <div class="field"><label>Auslösetemperatur</label>
+        <select id="mKlAusloese"><option value="">—</option><option>72 °C</option><option>95 °C</option><option>elektrisch/BMA</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Einbauort genau</label><input type="text" id="mKlEinbau" placeholder="z.B. Wand Nord, Decke Bad"></div>
+    <div class="field"><label>Hersteller / Typ</label><input type="text" id="mKlHersteller" placeholder="z.B. Trox FKA-EU"></div>
+    <button class="btn-save" onclick="saveKlappe()">Speichern</button>
+    <button class="btn-del" id="mKlDelBtn" onclick="deleteKlappeCurrent()" style="display:none">Klappe löschen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY = 'bsk_wartung_v1';
+
+// ── DATA ──────────────────────────────
+let DB = {kunden:[]};
+let cur = {kundeId:null,wohnId:null,klappId:null};
+let editMode = {};
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) DB = JSON.parse(raw);
+  }catch(e){ DB = {kunden:[]}; }
+}
+
+function saveDB(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify(DB));
+  }catch(e){
+    // localStorage full (photos too large) — warn user
+    showToast('⚠ Speicher voll! Bitte Fotos reduzieren.');
+  }
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── PRÜFPUNKTE ────────────────────────
+const SECS = [
+  {title:'1 · Einbausituation',items:[
+    {id:'e01',t:'Einbau unverändert, keine sichtbaren Schäden',s:'Befestigung, Einmauerung, Abstände kontrolliert'},
+    {id:'e02',t:'Revisionsöffnung frei zugänglich und unbeschädigt',s:'Mind. 300×300 mm, Beschriftung vorhanden'},
+    {id:'e03',t:'Keine Fremdeinbauten oder Verbauungen im Bereich der Klappe'},
+    {id:'e04',t:'Bereich sauber, keine Verschmutzung oder Verstopfung'}
+  ]},
+  {title:'2 · Mechanische Prüfung',items:[
+    {id:'m01',t:'Klappe schließt vollständig und dicht',s:'Sichtprüfung, kein sichtbarer Spalt'},
+    {id:'m02',t:'Klappe öffnet vollständig',s:'Keine Blockierung im Betriebszustand'},
+    {id:'m03',t:'Schließkraft / Federdruck ausreichend'},
+    {id:'m04',t:'Mechanismus ohne Korrosion oder Beschädigung'},
+    {id:'m05',t:'Lagerung und Schwenkachse gangbar',s:'Keine Schwergängigkeit, kein übermäßiges Spiel'},
+    {id:'m06',t:'Klappenkörper und Rahmen unbeschädigt',s:'Keine Verformungen, Löcher, Risse'},
+    {id:'m07',t:'Dichtleisten vollständig und elastisch'},
+    {id:'m08',t:'Klappe gereinigt (Staub, Schmutz entfernt)'}
+  ]},
+  {title:'3 · Auslöseeinrichtung',items:[
+    {id:'a01',t:'Schmelzlot / Thermoauslöser vorhanden und unverändert',s:'Typ und Auslösetemperatur geprüft (72 °C / 95 °C)'},
+    {id:'a02',t:'Schmelzlot ohne Beschädigung oder Manipulation'},
+    {id:'a03',t:'Elektrischer Antrieb funktionsfähig',s:'Bei rein thermischer Klappe → n.z.'},
+    {id:'a04',t:'Ansteuerung über BMA / RWA geprüft',s:'Auslösung durch Brandmeldezentrale simuliert'},
+    {id:'a05',t:'Rückmeldung Offen/Zu-Signal an GLT korrekt'},
+    {id:'a06',t:'Handauslösung (Notbetätigung) funktionsfähig'}
+  ]},
+  {title:'4 · Funktionsprüfung',items:[
+    {id:'f01',t:'Auslösung durchgeführt (manuell / simuliert)'},
+    {id:'f02',t:'Schließzeit ≤ Herstellerangabe (typisch ≤ 10 s)',s:'Messwert im Notizen-Tab eintragen'},
+    {id:'f03',t:'Klappe hält Schließstellung sicher (kein Zurückfedern)'},
+    {id:'f04',t:'Rückstellvorgang fehlerfrei',s:'Wieder betriebsbereit nach Rücksetzung'},
+    {id:'f05',t:'Dichtheit nach Schließen i.O.',s:'Kein sichtbarer Spalt'},
+    {id:'f06',t:'Klappe nach Prüfung in Betriebsstellung zurückgesetzt'},
+    {id:'f07',t:'Prüfplakette mit aktuellem Datum erneuert'}
+  ]}
+];
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// ── NAVIGATION ────────────────────────
+function showScreen(n){for(let i=1;i<=5;i++)document.getElementById('s'+i).classList.toggle('active',i===n);}
+function goBack(to){showScreen(to);if(to===1)renderKunden();if(to===2)renderWohnungen();if(to===3)renderKlappen();}
+
+// ── MODAL ─────────────────────────────
+function openModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+
+// ── HELPERS ───────────────────────────
+function v(id){return document.getElementById(id).value||'';}
+function set(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function getKunde(){return DB.kunden.find(k=>k.id===cur.kundeId)||{};}
+function getWohn(){const k=getKunde();return(k.wohnungen||[]).find(w=>w.id===cur.wohnId)||{};}
+function getKlappe(){const w=getWohn();return(w.klappen||[]).find(kl=>kl.id===cur.klappId)||{};}
+
+function klStats(kl){
+  const st=kl.state||{};let ok=0,nok=0,na=0,open=0;
+  SECS.forEach(s=>s.items.forEach(i=>{const vv=st[i.id]||'open';if(vv==='ok')ok++;else if(vv==='nok')nok++;else if(vv==='na')na++;else open++;}));
+  return{ok,nok,na,open,total:ok+nok+na+open};
+}
+function kundeStats(k){
+  let ok=0,nok=0,na=0,open=0,total=0;
+  (k.wohnungen||[]).forEach(w=>(w.klappen||[]).forEach(kl=>{const s=klStats(kl);ok+=s.ok;nok+=s.nok;na+=s.na;open+=s.open;total+=s.total;}));
+  return{ok,nok,na,open,total};
+}
+function statBadge(s){
+  if(!s.total)return`<span class="ibadge b-open">Neu</span>`;
+  if(s.nok>0)return`<span class="ibadge b-nok">✗ ${s.nok} n.i.O.</span>`;
+  if(s.open>0)return`<span class="ibadge b-part">${Math.round((s.ok+s.nok+s.na)/s.total*100)}%</span>`;
+  return`<span class="ibadge b-ok">✓ i.O.</span>`;
+}
+
+// ── KUNDEN ────────────────────────────
+function renderKunden(){
+  const el=document.getElementById('kundenList');
+  if(!DB.kunden.length){el.innerHTML=`<div class="empty"><div class="eico">🏢</div><p>Noch kein Kunde angelegt.<br>Tippe auf <strong>+</strong> um zu beginnen.</p></div>`;return;}
+  el.innerHTML=DB.kunden.map(k=>{
+    const s=kundeStats(k);
+    return`<div class="list-item" onclick="openKunde('${k.id}')">
+      <div class="item-icon ic-k">🏢</div>
+      <div class="item-body"><div class="item-title">${k.name}</div><div class="item-sub">${k.adresse||''}${k.datum?' · '+k.datum:''}</div></div>
+      ${statBadge(s)}<div class="item-arrow">›</div></div>`;
+  }).join('');
+}
+
+function openKunde(id){
+  cur.kundeId=id;const k=getKunde();
+  document.getElementById('s2title').textContent=k.name;
+  document.getElementById('s2sub').textContent=k.adresse||'Wohnungen / Räume';
+  showScreen(2);renderWohnungen();
+}
+
+function openNewKunde(){
+  editMode.kunde=false;
+  ['mKName','mKAdresse','mKKontakt','mKDatum','mKPruefer','mKNaechste'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mKDelBtn').style.display='none';
+  document.getElementById('mKTitle').textContent='Kunde hinzufügen';
+  openModal('mkunde');
+}
+
+function openEditKunde(){
+  const k=getKunde();editMode.kunde=true;
+  set('mKName',k.name);set('mKAdresse',k.adresse);set('mKKontakt',k.kontakt);
+  set('mKDatum',k.datum);set('mKPruefer',k.pruefer);set('mKNaechste',k.naechste);
+  document.getElementById('mKDelBtn').style.display='block';
+  document.getElementById('mKTitle').textContent='Kundendaten bearbeiten';
+  openModal('mkunde');
+}
+
+function saveKunde(){
+  const name=document.getElementById('mKName').value.trim();
+  if(!name)return alert('Bitte Kundenname eingeben');
+  if(editMode.kunde){
+    const k=getKunde();
+    k.name=name;k.adresse=v('mKAdresse');k.kontakt=v('mKKontakt');k.datum=v('mKDatum');k.pruefer=v('mKPruefer');k.naechste=v('mKNaechste');
+    saveDB();closeModal('mkunde');editMode.kunde=false;
+    document.getElementById('mKDelBtn').style.display='none';
+    document.getElementById('s2title').textContent=name;
+    document.getElementById('s2sub').textContent=v('mKAdresse')||'Wohnungen / Räume';
+    renderWohnungen();
+  } else {
+    const newId=uid();
+    DB.kunden.push({id:newId,name,adresse:v('mKAdresse'),kontakt:v('mKKontakt'),datum:v('mKDatum'),pruefer:v('mKPruefer'),naechste:v('mKNaechste'),wohnungen:[]});
+    saveDB();
+    ['mKName','mKAdresse','mKKontakt','mKDatum','mKPruefer','mKNaechste'].forEach(id=>document.getElementById(id).value='');
+    closeModal('mkunde');cur.kundeId=newId;
+    const k=getKunde();
+    document.getElementById('s2title').textContent=k.name;
+    document.getElementById('s2sub').textContent=k.adresse||'Wohnungen / Räume';
+    showScreen(2);renderWohnungen();renderKunden();
+  }
+}
+
+function deleteKunde(){
+  if(!confirm('Kunden und alle Daten löschen?'))return;
+  DB.kunden=DB.kunden.filter(k=>k.id!==cur.kundeId);
+  cur.kundeId=null;saveDB();closeModal('mkunde');renderKunden();showScreen(1);
+}
+
+// ── WOHNUNGEN ─────────────────────────
+function renderWohnungen(){
+  const k=getKunde();const el=document.getElementById('wohnList');const ws=k.wohnungen||[];
+  let html=`<div class="list-item" onclick="openGesamtProtokoll()" style="background:var(--gl);">
+    <div class="item-icon" style="background:var(--g);color:#fff;font-size:18px;">📋</div>
+    <div class="item-body"><div class="item-title" style="color:var(--g);">Jahresprotokoll erstellen</div><div class="item-sub">Alle Räume & Klappen</div></div>
+    <div class="item-arrow" style="color:var(--g);">›</div></div>
+  <div class="list-item" onclick="openEditKunde()" style="border-bottom:2px solid var(--br);">
+    <div class="item-icon" style="background:var(--bg3);font-size:18px;">✎</div>
+    <div class="item-body"><div class="item-title">Kundendaten bearbeiten</div><div class="item-sub">${k.pruefer?'Prüfer: '+k.pruefer:''} ${k.datum?'· '+k.datum:''}</div></div>
+  </div>`;
+  if(!ws.length){html+=`<div class="empty"><div class="eico">🏠</div><p>Noch kein Raum angelegt.<br>Tippe auf <strong>+</strong> um Wohnung/Raum hinzuzufügen.</p></div>`;}
+  else{html+=ws.map(w=>{
+    let wok=0,wnok=0,wopen=0,wtot=0;
+    (w.klappen||[]).forEach(kl=>{const s=klStats(kl);wok+=s.ok;wnok+=s.nok;wopen+=s.open;wtot+=s.total;});
+    return`<div class="list-item" onclick="openWohnung('${w.id}')">
+      <div class="item-icon ic-w">🏠</div>
+      <div class="item-body"><div class="item-title">${w.name}</div><div class="item-sub">${w.lage||''} ${w.nutzung?'· '+w.nutzung:''} · ${(w.klappen||[]).length} Klappe(n)</div></div>
+      ${statBadge({ok:wok,nok:wnok,open:wopen,total:wtot,na:0})}<div class="item-arrow">›</div></div>`;
+  }).join('');}
+  el.innerHTML=html;
+}
+
+function openWohnung(id){
+  cur.wohnId=id;const w=getWohn();
+  document.getElementById('s3title').textContent=w.name;
+  document.getElementById('s3sub').textContent=w.lage||w.nutzung||'Klappen';
+  showScreen(3);renderKlappen();
+}
+
+function openNewWohnung(){
+  editMode.wohn=false;
+  ['mWName','mWLage','mWBem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mWNutzung').value='';
+  document.getElementById('mWDelBtn').style.display='none';
+  document.getElementById('mWTitle').textContent='Wohnung / Raum hinzufügen';
+  openModal('mwohnung');
+}
+
+function openEditWohnung(){
+  const w=getWohn();editMode.wohn=true;
+  set('mWName',w.name);set('mWLage',w.lage);set('mWBem',w.bem);
+  document.getElementById('mWNutzung').value=w.nutzung||'';
+  document.getElementById('mWDelBtn').style.display='block';
+  document.getElementById('mWTitle').textContent='Raum bearbeiten';
+  openModal('mwohnung');
+}
+
+function saveWohnung(){
+  const name=document.getElementById('mWName').value.trim();
+  if(!name)return alert('Bitte Bezeichnung eingeben');
+  const k=getKunde();if(!k.wohnungen)k.wohnungen=[];
+  if(editMode.wohn){
+    const w=getWohn();w.name=name;w.lage=v('mWLage');w.nutzung=v('mWNutzung');w.bem=v('mWBem');
+  } else {
+    const newId=uid();
+    k.wohnungen.push({id:newId,name,lage:v('mWLage'),nutzung:v('mWNutzung'),bem:v('mWBem'),klappen:[]});
+  }
+  ['mWName','mWLage','mWBem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mWNutzung').value='';
+  editMode.wohn=false;document.getElementById('mWDelBtn').style.display='none';
+  saveDB();closeModal('mwohnung');renderWohnungen();
+}
+
+function deleteWohnung(){
+  if(!confirm('Raum und alle Klappen löschen?'))return;
+  const k=getKunde();k.wohnungen=k.wohnungen.filter(w=>w.id!==cur.wohnId);
+  cur.wohnId=null;saveDB();closeModal('mwohnung');renderWohnungen();
+}
+
+// ── KLAPPEN ───────────────────────────
+function renderKlappen(){
+  const w=getWohn();const el=document.getElementById('klapList');const kls=w.klappen||[];
+  if(!kls.length){el.innerHTML=`<div class="empty"><div class="eico">🔧</div><p>Noch keine Klappe.<br>Tippe auf <strong>+</strong> um eine Brandschutzklappe hinzuzufügen.</p></div>`;return;}
+  el.innerHTML=kls.map(kl=>{
+    const s=klStats(kl);const nokCls=s.nok>0?'nok':s.ok===s.total&&s.total>0?'ok':'';
+    return`<div class="list-item" onclick="openKlappe('${kl.id}')">
+      <div class="item-icon ic-kl ${nokCls}">🔧</div>
+      <div class="item-body"><div class="item-title">${kl.nr||'Klappe'}</div><div class="item-sub">${kl.nennmass||''} ${kl.fwk?'· '+kl.fwk:''} ${kl.einbau?'· '+kl.einbau:''}</div></div>
+      ${statBadge(s)}<div class="item-arrow">›</div></div>`;
+  }).join('');
+}
+
+function openNewKlappe(){
+  editMode.klappe=false;
+  ['mKlNr','mKlNennmass','mKlEinbau','mKlHersteller'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mKlFwk').value='';document.getElementById('mKlAusloese').value='';
+  document.getElementById('mKlDelBtn').style.display='none';
+  document.getElementById('mKlTitle').textContent='Klappe hinzufügen';
+  openModal('mklappe');
+}
+
+function openKlappeEditModal(){
+  const kl=getKlappe();editMode.klappe=true;
+  set('mKlNr',kl.nr);set('mKlNennmass',kl.nennmass);set('mKlEinbau',kl.einbau);set('mKlHersteller',kl.hersteller);
+  document.getElementById('mKlFwk').value=kl.fwk||'';document.getElementById('mKlAusloese').value=kl.ausloese||'';
+  document.getElementById('mKlDelBtn').style.display='block';
+  document.getElementById('mKlTitle').textContent='Klappe bearbeiten';
+  openModal('mklappe');
+}
+
+function saveKlappe(){
+  const nr=document.getElementById('mKlNr').value.trim();
+  if(!nr)return alert('Bitte Klappe Nr. eingeben');
+  const w=getWohn();if(!w.klappen)w.klappen=[];
+  if(editMode.klappe){
+    const kl=getKlappe();
+    kl.nr=nr;kl.nennmass=v('mKlNennmass');kl.fwk=v('mKlFwk');kl.ausloese=v('mKlAusloese');kl.einbau=v('mKlEinbau');kl.hersteller=v('mKlHersteller');
+    document.getElementById('s4title').textContent=kl.nr;
+    document.getElementById('s4sub').textContent=[kl.nennmass,kl.fwk,kl.einbau].filter(Boolean).join(' · ');
+  } else {
+    w.klappen.push({id:uid(),nr,nennmass:v('mKlNennmass'),fwk:v('mKlFwk'),ausloese:v('mKlAusloese'),einbau:v('mKlEinbau'),hersteller:v('mKlHersteller'),state:{},photos:[],maengel:'',massnahmen:'',schliesszeit:''});
+  }
+  ['mKlNr','mKlNennmass','mKlEinbau','mKlHersteller'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mKlFwk').value='';document.getElementById('mKlAusloese').value='';
+  editMode.klappe=false;document.getElementById('mKlDelBtn').style.display='none';
+  saveDB();closeModal('mklappe');renderKlappen();
+}
+
+function deleteKlappeCurrent(){
+  if(!confirm('Klappe löschen?'))return;
+  const w=getWohn();w.klappen=w.klappen.filter(kl=>kl.id!==cur.klappId);
+  cur.klappId=null;saveDB();closeModal('mklappe');goBack(3);
+}
+
+function openKlappe(id){
+  cur.klappId=id;const kl=getKlappe();
+  document.getElementById('s4title').textContent=kl.nr||'Prüfung';
+  document.getElementById('s4sub').textContent=[kl.nennmass,kl.fwk,kl.einbau].filter(Boolean).join(' · ');
+  buildChecklist(kl);buildPhotos(kl);
+  document.getElementById('fMaengel').value=kl.maengel||'';
+  document.getElementById('fMassnahmen').value=kl.massnahmen||'';
+  document.getElementById('fSchliesszeit').value=kl.schliesszeit||'';
+  switchTab('pruef');showScreen(4);
+}
+
+function saveKlappeDaten(){
+  const kl=getKlappe();if(!kl.id)return;
+  kl.maengel=document.getElementById('fMaengel').value;
+  kl.massnahmen=document.getElementById('fMassnahmen').value;
+  kl.schliesszeit=document.getElementById('fSchliesszeit').value;
+  saveDB();showToast('✓ Gespeichert');
+}
+
+// ── CHECKLIST ─────────────────────────
+function buildChecklist(kl){
+  const body=document.getElementById('checkBody');body.innerHTML='';
+  if(!kl.state)kl.state={};
+  SECS.forEach(sec=>{
+    const wrap=document.createElement('div');
+    const hdr=document.createElement('div');hdr.className='sec-hdr';hdr.innerHTML=`<h3>${sec.title}</h3>`;wrap.appendChild(hdr);
+    sec.items.forEach(item=>{
+      if(!kl.state[item.id])kl.state[item.id]='open';
+      const row=document.createElement('div');row.className='ci';
+      row.innerHTML=`<div class="ci-text"><div class="ci-main">${item.t}</div>${item.s?`<div class="ci-sub">${item.s}</div>`:''}</div>
+        <div class="tri">
+          <button class="bok ${kl.state[item.id]==='ok'?'on':''}" onclick="setCheck('${item.id}','ok',this)">✓</button>
+          <button class="bnok ${kl.state[item.id]==='nok'?'on':''}" onclick="setCheck('${item.id}','nok',this)">✗</button>
+          <button class="bna ${kl.state[item.id]==='na'?'on':''}" onclick="setCheck('${item.id}','na',this)">—</button>
+        </div>`;
+      wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+  updateStats();
+}
+
+function setCheck(id,val,btn){
+  const kl=getKlappe();kl.state[id]=kl.state[id]===val?'open':val;
+  btn.closest('.tri').querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+  if(kl.state[id]!=='open')btn.classList.add('on');
+  updateStats();saveDB();
+}
+
+function updateStats(){
+  const s=klStats(getKlappe());
+  document.getElementById('cOk').textContent=s.ok;document.getElementById('cNok').textContent=s.nok;
+  document.getElementById('cNa').textContent=s.na;document.getElementById('cOpen').textContent=s.open;
+  document.getElementById('pFill').style.width=s.total?Math.round((s.ok+s.nok+s.na)/s.total*100)+'%':'0%';
+}
+
+// ── FOTOS ─────────────────────────────
+function buildPhotos(kl){
+  const grid=document.getElementById('photoGrid');let html='';
+  (kl.photos||[]).forEach((p,i)=>{
+    html+=`<div class="photo-thumb"><img src="${p}" loading="lazy"><button class="photo-del" onclick="delPhoto(${i})">✕</button></div>`;
+  });
+  html+=`<label class="photo-add" for="photoInput"><span class="pico">📷</span><span>Foto hinzufügen</span></label>`;
+  grid.innerHTML=html;
+}
+
+function addPhotos(evt){
+  const kl=getKlappe();if(!kl.photos)kl.photos=[];
+  const files=Array.from(evt.target.files);let done=0;
+  files.forEach(file=>{
+    // Resize image before storing to save space
+    const img=new Image();const reader=new FileReader();
+    reader.onload=e=>{
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        const MAX=1200;let w=img.width,h=img.height;
+        if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+        if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        kl.photos.push(canvas.toDataURL('image/jpeg',0.75));
+        done++;if(done===files.length){saveDB();buildPhotos(kl);}
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  evt.target.value='';
+}
+
+function delPhoto(i){const kl=getKlappe();kl.photos.splice(i,1);saveDB();buildPhotos(kl);}
+
+// ── TABS ──────────────────────────────
+function switchTab(tab){
+  ['pruef','fotos','notizen'].forEach((t,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
+    const el=document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
+    el.style.display=t===tab?(t==='pruef'?'flex':'block'):'none';
+  });
+}
+
+// ── PROTOKOLL ─────────────────────────
+function openProtokoll(){
+  const k=getKunde();const w=getWohn();
+  document.getElementById('s5sub').textContent=k.name+' · '+w.name;
+  buildGesamtProtokoll(k,[cur.wohnId]);showScreen(5);
+}
+
+function openGesamtProtokoll(){
+  const k=getKunde();
+  document.getElementById('s5sub').textContent=k.name+(k.adresse?' · '+k.adresse:'');
+  buildGesamtProtokoll(k);showScreen(5);
+}
+
+function buildGesamtProtokoll(k,filter){
+  const wohnungen=(k.wohnungen||[]).filter(w=>!filter||filter.includes(w.id));
+  const tot={ok:0,nok:0,na:0,open:0,total:0};
+  wohnungen.forEach(w=>(w.klappen||[]).forEach(kl=>{const s=klStats(kl);tot.ok+=s.ok;tot.nok+=s.nok;tot.na+=s.na;tot.open+=s.open;tot.total+=s.total;}));
+  const gesBadge=tot.nok>0?`<span class="pbadge" style="background:var(--rl);color:var(--r)">⚠ Mängel festgestellt</span>`:
+    tot.open>0?`<span class="pbadge" style="background:var(--aml);color:var(--am)">◎ Unvollständig</span>`:
+    `<span class="pbadge" style="background:var(--gl);color:var(--g)">✓ Bestanden</span>`;
+  let html=`<div class="proto-hero"><h2>Jahreswartungsprotokoll</h2>${gesBadge}</div>
+  <div class="pcard"><div class="proto-sec-lbl">Kundendaten</div>
+    <div class="prow"><span class="plbl">Kunde</span><span>${k.name}</span></div>
+    <div class="prow"><span class="plbl">Adresse</span><span>${k.adresse||'—'}</span></div>
+    <div class="prow"><span class="plbl">Ansprechpartner</span><span>${k.kontakt||'—'}</span></div>
+    <div class="prow"><span class="plbl">Prüfdatum</span><span>${k.datum||'—'}</span></div>
+    <div class="prow"><span class="plbl">Prüfer</span><span>${k.pruefer||'—'}</span></div>
+    <div class="prow"><span class="plbl">Nächste Prüfung</span><span>${k.naechste||'—'}</span></div>
+  </div>
+  <div class="pcard"><div class="proto-sec-lbl">Gesamtergebnis</div>
+    <div class="prow"><span class="plbl">Räume</span><span>${wohnungen.length}</span></div>
+    <div class="prow"><span class="plbl">Klappen gesamt</span><span>${wohnungen.reduce((a,w)=>a+(w.klappen||[]).length,0)}</span></div>
+    <div class="prow"><span class="plbl">In Ordnung (i.O.)</span><span class="ri-ok">✓ ${tot.ok}</span></div>
+    <div class="prow"><span class="plbl">Nicht in Ordnung (n.i.O.)</span><span class="ri-nok">✗ ${tot.nok}</span></div>
+    <div class="prow"><span class="plbl">Nicht zutreffend (n.z.)</span><span class="ri-na">— ${tot.na}</span></div>
+    <div class="prow"><span class="plbl">Offen</span><span class="ri-open">? ${tot.open}</span></div>
+  </div>`;
+  wohnungen.forEach(w=>{
+    html+=`<div class="pcard"><div class="proto-sec-lbl">🏠 ${w.name}${w.lage?' · '+w.lage:''}</div>`;
+    if(!(w.klappen||[]).length){html+=`<div class="prow"><span class="plbl">Keine Klappen erfasst</span></div>`;}
+    (w.klappen||[]).forEach(kl=>{
+      const s=klStats(kl);const col=s.nok>0?'var(--r)':s.open>0?'var(--am)':'var(--g)';
+      html+=`<div style="border:1px solid var(--br);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
+        <div class="prow" style="font-weight:500;"><span>${kl.nr}${kl.nennmass?' · '+kl.nennmass:''}</span><span style="color:${col}">${s.nok>0?'✗ '+s.nok+' n.i.O.':s.open>0?'? '+s.open+' offen':'✓ i.O.'}</span></div>
+        ${kl.fwk||kl.einbau?`<div style="font-size:11px;color:var(--tx3);margin-top:2px;">${[kl.fwk,kl.ausloese,kl.einbau].filter(Boolean).join(' · ')}</div>`:''}
+        ${kl.schliesszeit?`<div class="prow"><span class="plbl">Schließzeit</span><span>${kl.schliesszeit}</span></div>`:''}
+        ${s.nok>0?'<div style="margin-top:6px;">'+SECS.flatMap(sec=>sec.items.filter(i=>(kl.state||{})[i.id]==='nok').map(i=>`<div style="font-size:11px;color:var(--r);padding:2px 0;">✗ ${i.t}</div>`)).join('')+'</div>':''}
+        ${kl.maengel?`<div style="font-size:12px;color:var(--tx2);margin-top:4px;padding:4px 6px;background:var(--rl);border-radius:4px;">${kl.maengel}</div>`:''}
+        ${kl.massnahmen?`<div style="font-size:12px;color:var(--tx2);margin-top:4px;padding:4px 6px;background:var(--aml);border-radius:4px;">${kl.massnahmen}</div>`:''}
+        ${(kl.photos||[]).length?`<div class="proto-photos">${kl.photos.map(p=>`<img src="${p}">`).join('')}</div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('protoContent').innerHTML=html;
+}
+
+// ── DRUCKEN ───────────────────────────
+function printAll(){
+  const k=getKunde();const wohnungen=k.wohnungen||[];
+  let rows='';
+  wohnungen.forEach(w=>{
+    rows+=`<tr><td colspan="2" style="background:#EDECE8;font-weight:700;padding:6px 8px;font-size:9pt;">🏠 ${w.name}${w.lage?' · '+w.lage:''}${w.nutzung?' ('+w.nutzung+')':''}</td></tr>`;
+    (w.klappen||[]).forEach(kl=>{
+      rows+=`<tr><td colspan="2" style="background:#F6F5F2;padding:5px 8px;font-size:9pt;font-weight:600;">🔧 ${kl.nr}${kl.nennmass?' · '+kl.nennmass:''}${kl.fwk?' · '+kl.fwk:''}${kl.einbau?' · '+kl.einbau:''}</td></tr>`;
+      if(kl.schliesszeit)rows+=`<tr><td colspan="2" style="padding:3px 8px;font-size:8pt;color:#555;">Schließzeit: ${kl.schliesszeit}</td></tr>`;
+      SECS.forEach(sec=>{
+        rows+=`<tr><td colspan="2" style="padding:4px 8px;background:#f8f8f6;font-size:8pt;font-weight:600;color:#555;">${sec.title}</td></tr>`;
+        sec.items.forEach(item=>{
+          const sv=(kl.state||{})[item.id]||'open';
+          const icon=sv==='ok'?'✓ i.O.':sv==='nok'?'✗ n.i.O.':sv==='na'?'— n.z.':'? offen';
+          const col=sv==='ok'?'#27500A':sv==='nok'?'#A32D2D':sv==='na'?'#0C447C':'#888';
+          rows+=`<tr><td style="padding:4px 8px 4px 16px;font-size:8pt;border-bottom:.5px solid #e5e5e5;">${item.t}${item.s?` <span style="color:#aaa">(${item.s})</span>`:''}</td><td style="padding:4px 8px;font-size:8pt;font-weight:600;color:${col};text-align:right;white-space:nowrap;border-bottom:.5px solid #e5e5e5;">${icon}</td></tr>`;
+        });
+      });
+      const nokItems=SECS.flatMap(sec=>sec.items.filter(i=>(kl.state||{})[i.id]==='nok'));
+      if(nokItems.length)rows+=`<tr><td colspan="2" style="padding:4px 8px;font-size:8pt;color:#A32D2D;font-weight:600;">Mängel: ${nokItems.map(i=>i.t).join(' | ')}</td></tr>`;
+      if(kl.maengel)rows+=`<tr><td colspan="2" style="padding:4px 8px;font-size:8pt;background:#FCEBEB;color:#A32D2D;">Bemerkung: ${kl.maengel}</td></tr>`;
+      if(kl.massnahmen)rows+=`<tr><td colspan="2" style="padding:4px 8px;font-size:8pt;background:#FAEEDA;color:#854F0B;">Maßnahmen: ${kl.massnahmen}</td></tr>`;
+      if((kl.photos||[]).length){
+        rows+=`<tr><td colspan="2" style="padding:6px 8px;"><table><tr>${kl.photos.map(p=>`<td><img src="${p}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;margin:2px;"></td>`).join('')}</tr></table></td></tr>`;
+      }
+    });
+  });
+  const tot={ok:0,nok:0,na:0,open:0};
+  wohnungen.forEach(w=>(w.klappen||[]).forEach(kl=>{const s=klStats(kl);tot.ok+=s.ok;tot.nok+=s.nok;tot.na+=s.na;tot.open+=s.open;}));
+  const gesamt=tot.nok>0?'MÄNGEL FESTGESTELLT':tot.open>0?'UNVOLLSTÄNDIG':'BESTANDEN';
+  const gCol=tot.nok>0?'#A32D2D':tot.open>0?'#854F0B':'#27500A';
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>BSK ${k.name}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:10pt;max-width:800px;margin:20px auto;padding:0 16px;}
+  h1{font-size:15pt;font-weight:700;margin-bottom:2px;}h2{font-size:10pt;color:#555;font-weight:400;}
+  .badge{display:inline-block;padding:4px 14px;border-radius:4px;font-weight:700;color:#fff;background:${gCol};margin-bottom:12px;}
+  .meta{width:100%;border-collapse:collapse;margin-bottom:14px;}
+  .meta td{padding:4px 8px;font-size:9pt;border-bottom:.5px solid #ddd;}.meta .l{color:#666;width:130px;}
+  table.ch{width:100%;border-collapse:collapse;}
+  .sig{margin-top:28px;display:flex;gap:40px;}.sig-box{flex:1;border-top:1px solid #555;padding-top:4px;font-size:8pt;color:#555;}
+  .footer{margin-top:20px;padding-top:8px;border-top:.5px solid #ccc;display:flex;justify-content:space-between;font-size:8pt;color:#aaa;}
+  @media print{@page{margin:1cm 1.5cm;}}</style></head><body>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+    <div><h1>🔧 Brandschutzklappe — Jahreswartungsprotokoll</h1><h2>Jährliche Kontrolle gemäß ÖNORM EN 1366-2 / VDI 6022</h2><span class="badge">${gesamt}</span></div>
+    <div style="text-align:right;font-size:9pt;color:#555;"><strong>Bartoska Gebäudereinigung</strong><br>Vasoldsberg, Österreich<br>VDI 6022 zertifiziert<br>bartoska.at</div>
+  </div>
+  <table class="meta">
+    <tr><td class="l">Kunde:</td><td><strong>${k.name}</strong></td><td class="l">Adresse:</td><td>${k.adresse||'—'}</td></tr>
+    <tr><td class="l">Ansprechpartner:</td><td>${k.kontakt||'—'}</td><td class="l">Prüfdatum:</td><td>${k.datum||'—'}</td></tr>
+    <tr><td class="l">Prüfer:</td><td>${k.pruefer||'—'}</td><td class="l">Nächste Prüfung:</td><td>${k.naechste||'—'}</td></tr>
+    <tr><td class="l">Ergebnis:</td><td colspan="3" style="font-weight:700;color:${gCol}">i.O.: ${tot.ok} | n.i.O.: ${tot.nok} | n.z.: ${tot.na} | offen: ${tot.open}</td></tr>
+  </table>
+  <table class="ch">${rows}</table>
+  <div class="sig"><div class="sig-box">Ort, Datum: ___________________________</div><div class="sig-box">Unterschrift Prüfer: ___________________________</div><div class="sig-box">Firmenstempel:</div></div>
+  <div class="footer"><span>Bartoska Gebäudereinigung · bartoska.at</span><span>Erstellt: ${new Date().toLocaleDateString('de-AT')}</span></div>
+  </body></html>`);
+  win.document.close();setTimeout(()=>win.print(),400);
+}
+
+function shareAll(){
+  const k=getKunde();const wohnungen=k.wohnungen||[];
+  const tot={ok:0,nok:0,na:0,open:0};
+  wohnungen.forEach(w=>(w.klappen||[]).forEach(kl=>{const s=klStats(kl);tot.ok+=s.ok;tot.nok+=s.nok;tot.na+=s.na;tot.open+=s.open;}));
+  const result=tot.nok>0?'⚠ MÄNGEL':tot.open>0?'◎ UNVOLLSTÄNDIG':'✓ BESTANDEN';
+  let text=`BSK JAHRESWARTUNG — Bartoska Gebäudereinigung\n\nKunde: ${k.name}\nAdresse: ${k.adresse||'—'}\nWartungsdatum: ${k.datum||'—'}\nPrüfer: ${k.pruefer||'—'}\n\nErgebnis: ${result}\ni.O.:${tot.ok} n.i.O.:${tot.nok} n.z.:${tot.na} offen:${tot.open}\n`;
+  wohnungen.forEach(w=>{text+=`\n🏠 ${w.name}\n`;(w.klappen||[]).forEach(kl=>{const s=klStats(kl);text+=`  🔧 ${kl.nr}: ${s.nok>0?s.nok+' n.i.O.':s.open>0?s.open+' offen':'OK'}\n`;if(kl.maengel)text+=`     ${kl.maengel}\n`;});});
+  text+=`\nbartoska.at`;
+  if(navigator.share)navigator.share({title:`BSK ${k.name}`,text});
+  else window.location.href=`mailto:?subject=${encodeURIComponent('BSK '+k.name)}&body=${encodeURIComponent(text)}`;
+}
+
+// ── INIT ──────────────────────────────
+loadDB();
+renderKunden();
+
+// Service Worker registrieren (PWA offline + Homescreen)
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='bsk-wartung-v1';
+    const URL=self.location.pathname;
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.add(URL))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(URL)))));
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+</script>
+</body>
+</html>
